@@ -1,0 +1,20 @@
+/*
+ *  Camkes interface of TlsServer
+ *
+ *  Copyright (C) 2020, Hensoldt Cyber GmbH
+ *
+ */
+
+procedure if_TlsServer {
+    include "SeosError.h";
+
+    seos_err_t
+    connect(
+        in string   host,
+        in uint16_t port
+    );
+
+    seos_err_t
+    disconnect(
+    );
+};

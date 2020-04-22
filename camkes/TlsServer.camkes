@@ -1,0 +1,38 @@
+/*
+ *  Camkes definition of TlsServer component
+ *
+ *  Copyright (C) 2020, Hensoldt Cyber GmbH
+ *
+ */
+
+import <if_OS_socket.camkes>;
+import <if_OS_Tls.camkes>;
+
+import "if_TlsServer.camkes";
+
+struct serverConfig {
+    int numClients;
+    string trustedCert;
+}
+
+component TlsServer {
+    control;
+
+    // Networking interface
+    uses        if_OS_socket                network_stack_rpc;
+    dataport    Buf                         NwAppDataPort;
+    consumes    ServiceReady                event_network_stack_init_done;
+
+    // TlsServer interface to connect/disconnect sockets
+    provides    if_TlsServer                TlsServer;
+
+    // TlsLibServer interface for TLS library implementation
+    provides    if_OS_Tls                   TlsLibServer;
+    dataport    Buf                         TlsLibDataport;
+
+    // Configure the TlsServer
+    attribute   serverConfig                config;
+
+    // Semaphore for synching RPC threads with init process
+    has         semaphore                   sem_init;
+}
