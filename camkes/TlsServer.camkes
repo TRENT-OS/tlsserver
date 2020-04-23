@@ -41,7 +41,6 @@ struct TlsServer_Config {
     component _name_ { \
         dataport    Buf                     network_stack_dp; \
         uses        if_OS_Socket            network_stack_rpc; \
-        consumes    ServiceReady            event_network_stack_init_done; \
         \
         provides    if_TlsServer            tlsServer_rpc; \
         dataport    Buf                     tlsServer_port; \
@@ -70,8 +69,7 @@ struct TlsServer_Config {
     _entropy_rpc_, \
     _entropy_port_, \
     _nw_rpc_, \
-    _nw_port_, \
-    _nw_evt_) \
+    _nw_port_) \
     \
     connection  seL4RPCCall \
         _inst_ ## _entropy_rpc( \
@@ -93,11 +91,6 @@ struct TlsServer_Config {
             from    _inst_.network_stack_dp, \
             to      _nw_port_ \
         ); \
-    connection seL4NotificationNative \
-        _inst_ ## _nw_evt( \
-            from    _nw_evt_, \
-            to      _inst_.event_network_stack_init_done \
-        );
 
 
 //------------------------------------------------------------------------------

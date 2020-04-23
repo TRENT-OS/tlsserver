@@ -25,9 +25,6 @@
         } \
     } while(0)
 
-// We need this to wait for NW to complete init process
-extern OS_Error_t OS_NetworkAPP_RT(OS_Network_Context_t ctx);
-
 // Forward declarations
 static int send(void* ctx, const unsigned char* buf, size_t len);
 static int recv(void* ctx, unsigned char* buf, size_t len);
@@ -173,7 +170,6 @@ post_init()
 
     Debug_LOG_INFO("Starting up");
 
-    OS_NetworkAPP_RT(NULL);
     init_network_client_api();
     Debug_LOG_INFO("Networking initialized");
 
