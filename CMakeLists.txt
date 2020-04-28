@@ -8,7 +8,6 @@ seos_use_libs(
     SEOS_NETWORK_DRIVER_TAP_PROXY
     SEOS_CRYPTO
     SEOS_TLS_WITH_RPC_SERVER
-    SEOS_TLS_IMPL_MBEDTLS
 )
 
 project(tlsserver C)
