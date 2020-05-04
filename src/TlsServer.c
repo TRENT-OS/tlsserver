@@ -194,10 +194,6 @@ int run()
     static OS_Crypto_Config_t cryptoCfg =
     {
         .mode = OS_Crypto_MODE_LIBRARY_ONLY,
-        .mem = {
-            .malloc = malloc,
-            .free   = free,
-        },
         .library.rng.entropy = entropy
     };
     static OS_Tls_Config_t tlsCfg =
