@@ -31,7 +31,7 @@
  * @retval SEOS_ERROR_INVALID_STATE if the socket is already connected
  * @retval SEOS_ERROR_NOT_FOUND if the state of the RPC client could not be found
  */
-seos_err_t
+OS_Error_t
 TlsServer_connect(
     const char*    host,
     const uint16_t port);
@@ -48,7 +48,7 @@ TlsServer_connect(
  * @retval SEOS_ERROR_INVALID_STATE if the socket is already connected
  * @retval SEOS_ERROR_NOT_FOUND if the state of the RPC client could not be found
  */
-seos_err_t
+OS_Error_t
 TlsServer_disconnect(
     void);
 

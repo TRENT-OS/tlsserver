@@ -6,15 +6,15 @@
  */
 
 procedure if_TlsServer {
-    include "SeosError.h";
+    include "OS_Error.h";
 
-    seos_err_t
+    OS_Error_t
     connect(
         in string   host,
         in uint16_t port
     );
 
-    seos_err_t
+    OS_Error_t
     disconnect(
     );
 };

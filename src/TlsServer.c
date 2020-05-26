@@ -15,7 +15,7 @@
 #include <string.h>
 
 // We need this to wait for NW to complete init process
-extern seos_err_t OS_NetworkAPP_RT(OS_Network_Context_t ctx);
+extern OS_Error_t OS_NetworkAPP_RT(OS_Network_Context_t ctx);
 
 /*
  * These are auto-generated based on interface names; they give unique ID
@@ -64,7 +64,7 @@ send(
     const unsigned char* buf,
     size_t               len)
 {
-    seos_err_t err;
+    OS_Error_t err;
     OS_NetworkSocket_Handle_t* hSocket = (OS_NetworkSocket_Handle_t*) ctx;
     size_t n;
 
@@ -84,7 +84,7 @@ recv(
     unsigned char* buf,
     size_t         len)
 {
-    seos_err_t err;
+    OS_Error_t err;
     OS_NetworkSocket_Handle_t* hSocket = (OS_NetworkSocket_Handle_t*) ctx;
     size_t n;
 
@@ -215,7 +215,7 @@ int run()
         }
     };
     TlsServer_Client* client;
-    seos_err_t err;
+    OS_Error_t err;
 
     // Check the configuration is somewhat sane
     Debug_ASSERT(strlen(config.trustedCert) <= OS_Tls_SIZE_CA_CERT_MAX);
@@ -272,7 +272,7 @@ int run()
     return 0;
 }
 
-seos_err_t
+OS_Error_t
 TlsServer_connect(
     const char*    host,
     const uint16_t port)
@@ -282,7 +282,7 @@ TlsServer_connect(
         .domain = OS_AF_INET,
         .type   = OS_SOCK_STREAM,
     };
-    seos_err_t err;
+    OS_Error_t err;
     TlsServer_Client* client;
 
     /*
@@ -326,11 +326,11 @@ TlsServer_connect(
     return SEOS_SUCCESS;
 }
 
-seos_err_t
+OS_Error_t
 TlsServer_disconnect(
     void)
 {
-    seos_err_t err;
+    OS_Error_t err;
     TlsServer_Client* client;
 
     if ((client = TlsServer_getClient()) == NULL)
