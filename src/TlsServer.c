@@ -115,7 +115,7 @@ entropy(
  * 1. The TlsServer interface, as explicitly defined in the relevant CAmkES
  *    file and as visible in TlsServer.h and this file.
  * 2. The TlsLibServer interface, due to the fact that this component is
- *    linked with SEOS_TLS_WITH_RCP_SERVER and thus contains the TLS API
+ *    linked with OS_TLS_WITH_RCP_SERVER and thus contains the TLS API
  *    LIB and RPC Server code.
  * Mapping to the data structure is based on the numeric "sender ID" which each
  * CAmkES call to an interface provides. However, we need to ensure that
