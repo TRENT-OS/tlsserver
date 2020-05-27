@@ -26,10 +26,10 @@
  * @param port (required) Port number to use
  *
  * @return an error code
- * @retval SEOS_SUCCESS if operation succeeded
- * @retval SEOS_ERROR_INVALID_PARAMETER if a parameter was missing or invalid
- * @retval SEOS_ERROR_INVALID_STATE if the socket is already connected
- * @retval SEOS_ERROR_NOT_FOUND if the state of the RPC client could not be found
+ * @retval OS_SUCCESS if operation succeeded
+ * @retval OS_ERROR_INVALID_PARAMETER if a parameter was missing or invalid
+ * @retval OS_ERROR_INVALID_STATE if the socket is already connected
+ * @retval OS_ERROR_NOT_FOUND if the state of the RPC client could not be found
  */
 OS_Error_t
 TlsServer_connect(
@@ -43,10 +43,10 @@ TlsServer_connect(
  * the connection and close the socket.
  *
  * @return an error code
- * @retval SEOS_SUCCESS if operation succeeded
- * @retval SEOS_ERROR_INVALID_PARAMETER if a parameter was missing or invalid
- * @retval SEOS_ERROR_INVALID_STATE if the socket is already connected
- * @retval SEOS_ERROR_NOT_FOUND if the state of the RPC client could not be found
+ * @retval OS_SUCCESS if operation succeeded
+ * @retval OS_ERROR_INVALID_PARAMETER if a parameter was missing or invalid
+ * @retval OS_ERROR_INVALID_STATE if the socket is already connected
+ * @retval OS_ERROR_NOT_FOUND if the state of the RPC client could not be found
  */
 OS_Error_t
 TlsServer_disconnect(

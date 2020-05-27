@@ -69,7 +69,7 @@ send(
     size_t n;
 
     n = len > MAX_NW_SIZE ? MAX_NW_SIZE : len;
-    if ((err = OS_NetworkSocket_write(*hSocket, buf, &n)) != SEOS_SUCCESS)
+    if ((err = OS_NetworkSocket_write(*hSocket, buf, &n)) != OS_SUCCESS)
     {
         Debug_LOG_ERROR("Error during hSocket write...error:%d", err);
         return -1;
@@ -89,7 +89,7 @@ recv(
     size_t n;
 
     n = len > MAX_NW_SIZE ? MAX_NW_SIZE : len;
-    if ((err = OS_NetworkSocket_read(*hSocket, buf, &n)) != SEOS_SUCCESS)
+    if ((err = OS_NetworkSocket_read(*hSocket, buf, &n)) != OS_SUCCESS)
     {
         Debug_LOG_ERROR("Error during hSocket read...error:%d", err);
         return -1;
@@ -240,7 +240,7 @@ int run()
         client->connected = false;
 
         // Create Crypto instance
-        if ((err = OS_Crypto_init(&client->hCrypto, &cryptoCfg)) != SEOS_SUCCESS)
+        if ((err = OS_Crypto_init(&client->hCrypto, &cryptoCfg)) != OS_SUCCESS)
         {
             Debug_LOG_ERROR("Failed to init Crypto API instance [err=%i]", err);
             return err;
@@ -250,7 +250,7 @@ int run()
         // later when the user calls connect()
         tlsCfg.config.server.library.crypto.handle  = client->hCrypto;
         tlsCfg.config.server.library.socket.context = &client->hSocket;
-        if ((err = OS_Tls_init(&client->hTls, &tlsCfg)) != SEOS_SUCCESS)
+        if ((err = OS_Tls_init(&client->hTls, &tlsCfg)) != OS_SUCCESS)
         {
             Debug_LOG_ERROR("Failed to init TLS API instance [err=%i]", err);
             return err;
@@ -293,29 +293,29 @@ TlsServer_connect(
     if (0 == strlen(host))
     {
         Debug_LOG_ERROR("host cannot be empty");
-        return SEOS_ERROR_INVALID_PARAMETER;
+        return OS_ERROR_INVALID_PARAMETER;
     }
     if (port < 1 || port > 65535)
     {
         Debug_LOG_ERROR("Port number is invalid");
-        return SEOS_ERROR_INVALID_PARAMETER;
+        return OS_ERROR_INVALID_PARAMETER;
     }
     if ((client = TlsServer_getClient()) == NULL)
     {
         Debug_LOG_ERROR("Could not get corresponding client state");
-        return SEOS_ERROR_NOT_FOUND;
+        return OS_ERROR_NOT_FOUND;
     }
     if (client->connected)
     {
         Debug_LOG_ERROR("Socket of client (%i) is already connected", client->id);
-        return SEOS_ERROR_INVALID_STATE;
+        return OS_ERROR_INVALID_STATE;
     }
 
     socketCfg.name = host;
     socketCfg.port = port;
 
     if ((err = OS_NetworkSocket_create(NULL, &socketCfg,
-                                       &client->hSocket)) != SEOS_SUCCESS)
+                                       &client->hSocket)) != OS_SUCCESS)
     {
         Debug_LOG_ERROR("Creating NetworkSocket failed [err=%i]", err);
         return err;
@@ -323,7 +323,7 @@ TlsServer_connect(
 
     client->connected = true;
 
-    return SEOS_SUCCESS;
+    return OS_SUCCESS;
 }
 
 OS_Error_t
@@ -336,15 +336,15 @@ TlsServer_disconnect(
     if ((client = TlsServer_getClient()) == NULL)
     {
         Debug_LOG_ERROR("Could not get corresponding client state");
-        return SEOS_ERROR_NOT_FOUND;
+        return OS_ERROR_NOT_FOUND;
     }
     if (!client->connected)
     {
         Debug_LOG_ERROR("Socket of client (%i) is not connected", client->id);
-        return SEOS_ERROR_INVALID_STATE;
+        return OS_ERROR_INVALID_STATE;
     }
 
-    if ((err = OS_NetworkSocket_close(client->hSocket)) != SEOS_SUCCESS)
+    if ((err = OS_NetworkSocket_close(client->hSocket)) != OS_SUCCESS)
     {
         Debug_LOG_ERROR("Closing NetworkSocket failed [err=%i]", err);
         return err;
@@ -352,5 +352,5 @@ TlsServer_disconnect(
 
     client->connected = false;
 
-    return SEOS_SUCCESS;
+    return OS_SUCCESS;
 }
