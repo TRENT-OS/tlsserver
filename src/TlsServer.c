@@ -17,6 +17,38 @@
 // We need this to wait for NW to complete init process
 extern OS_Error_t OS_NetworkAPP_RT(OS_Network_Context_t ctx);
 
+// Forward declarations
+static int send(void* ctx, const unsigned char* buf, size_t len);
+static int recv(void* ctx, unsigned char* buf, size_t len);
+static int entropy(void* ctx, unsigned char* buf, size_t len);
+
+static OS_Crypto_Config_t cryptoCfg =
+{
+    .mode = OS_Crypto_MODE_LIBRARY_ONLY,
+    .library.rng.entropy = entropy
+};
+static OS_Tls_Config_t tlsCfg =
+{
+    .mode = OS_Tls_MODE_SERVER,
+    .config.server = {
+        .dataport = OS_DATAPORT_ASSIGN(TlsLibDataport),
+        .library = {
+            .socket = {
+                .recv = recv,
+                .send = send,
+            },
+            .flags = OS_Tls_FLAG_DEBUG,
+            .crypto = {
+                .cipherSuites = {
+                    OS_Tls_CIPHERSUITE_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+                    OS_Tls_CIPHERSUITE_DHE_RSA_WITH_AES_128_GCM_SHA256
+                },
+                .cipherSuitesLen = 2
+            }
+        }
+    }
+};
+
 /*
  * These are auto-generated based on interface names; they give unique ID
  * assigned to the user of the interface.
@@ -191,29 +223,6 @@ TlsLibServer_getTls(
  */
 int run()
 {
-    static OS_Crypto_Config_t cryptoCfg =
-    {
-        .mode = OS_Crypto_MODE_LIBRARY_ONLY,
-        .library.rng.entropy = entropy
-    };
-    static OS_Tls_Config_t tlsCfg =
-    {
-        .mode = OS_Tls_MODE_SERVER,
-        .config.server.library = {
-            .socket = {
-                .recv = recv,
-                .send = send,
-            },
-            .flags = OS_Tls_FLAG_DEBUG,
-            .crypto = {
-                .cipherSuites = {
-                    OS_Tls_CIPHERSUITE_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-                    OS_Tls_CIPHERSUITE_DHE_RSA_WITH_AES_128_GCM_SHA256
-                },
-                .cipherSuitesLen = 2
-            }
-        }
-    };
     TlsServer_Client* client;
     OS_Error_t err;
 
@@ -228,7 +237,6 @@ int run()
     OS_NetworkAPP_RT(NULL);
     Debug_LOG_INFO("Networking initialized");
 
-    tlsCfg.config.server.dataport = TlsLibDataport;
     strcpy(tlsCfg.config.server.library.crypto.caCert, config.trustedCert);
     for (size_t i = 0; i < config.numClients; i++)
     {
