@@ -30,21 +30,19 @@ static OS_Crypto_Config_t cryptoCfg =
 static OS_Tls_Config_t tlsCfg =
 {
     .mode = OS_Tls_MODE_SERVER,
-    .config.server = {
-        .dataport = OS_DATAPORT_ASSIGN(TlsLibDataport),
-        .library = {
-            .socket = {
-                .recv = recv,
-                .send = send,
+    .dataport = OS_DATAPORT_ASSIGN(TlsLibDataport),
+    .library = {
+        .socket = {
+            .recv = recv,
+            .send = send,
+        },
+        .flags = OS_Tls_FLAG_DEBUG,
+        .crypto = {
+            .cipherSuites = {
+                OS_Tls_CIPHERSUITE_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+                OS_Tls_CIPHERSUITE_DHE_RSA_WITH_AES_128_GCM_SHA256
             },
-            .flags = OS_Tls_FLAG_DEBUG,
-            .crypto = {
-                .cipherSuites = {
-                    OS_Tls_CIPHERSUITE_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-                    OS_Tls_CIPHERSUITE_DHE_RSA_WITH_AES_128_GCM_SHA256
-                },
-                .cipherSuitesLen = 2
-            }
+            .cipherSuitesLen = 2
         }
     }
 };
@@ -237,7 +235,7 @@ int run()
     OS_NetworkAPP_RT(NULL);
     Debug_LOG_INFO("Networking initialized");
 
-    strcpy(tlsCfg.config.server.library.crypto.caCert, config.trustedCert);
+    strcpy(tlsCfg.library.crypto.caCert, config.trustedCert);
     for (size_t i = 0; i < config.numClients; i++)
     {
         client = &serverState.clients[i];
@@ -256,8 +254,8 @@ int run()
 
         // We have the crypto set up here already, but the socket will be connected
         // later when the user calls connect()
-        tlsCfg.config.server.library.crypto.handle  = client->hCrypto;
-        tlsCfg.config.server.library.socket.context = &client->hSocket;
+        tlsCfg.library.crypto.handle  = client->hCrypto;
+        tlsCfg.library.socket.context = &client->hSocket;
         if ((err = OS_Tls_init(&client->hTls, &tlsCfg)) != OS_SUCCESS)
         {
             Debug_LOG_ERROR("Failed to init TLS API instance [err=%i]", err);
