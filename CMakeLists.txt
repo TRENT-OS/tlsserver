@@ -58,9 +58,9 @@ function(DeclareCAmkESComponent_TlsServer name)
             -Wall
             -Werror
         LIBS
-            seos_core_api
-            seos_libs
-            seos_tls_with_rpc_server
+            os_core_api
+            os_libs
+            os_tls_with_rpc_server
             ${TLS_SERVER_LIBS}
     )
 
@@ -79,7 +79,7 @@ function(DeclareCAmkESComponent_TlsServer name)
 
     target_link_libraries(${PROJECT_NAME}
         INTERFACE
-            seos_tls_with_rpc_client
+            os_tls_with_rpc_client
     )
 
 endfunction()
