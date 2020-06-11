@@ -39,12 +39,6 @@ function(DeclareCAmkESComponent_TlsServer name)
         "LIBS" # Multiple arguments
     )
 
-    os_use_libs(
-        OS_LIBS
-        OS_TLS_WITH_RPC_SERVER
-        OS_TLS_WITH_RPC_CLIENT
-    )
-
     #---------------------------------------------------------------------------
     DeclareCAmkESComponent(${name}
         INCLUDES
