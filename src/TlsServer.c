@@ -307,7 +307,7 @@ TlsServer_connect(
         return OS_ERROR_INVALID_STATE;
     }
 
-    socketCfg.name = host;
+    strncpy(socketCfg.name, host, sizeof(socketCfg.name)-1);
     socketCfg.port = port;
 
     if ((err = OS_NetworkSocket_create(NULL, &socketCfg,
