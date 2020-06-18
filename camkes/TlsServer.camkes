@@ -7,6 +7,7 @@
 
 import <if_OS_socket.camkes>;
 import <if_OS_Tls.camkes>;
+import <if_OS_EntropySource.camkes>;
 
 import "if_TlsServer.camkes";
 
@@ -29,6 +30,10 @@ component TlsServer {
     // TlsLibServer interface for TLS library implementation
     provides    if_OS_Tls                   TlsLibServer;
     dataport    Buf                         TlsLibDataport;
+
+    // For EntropySource
+    uses        if_OS_EntropySource         entropySource_rpc;
+    dataport    Buf                         entropySource_dp;
 
     // Configure the TlsServer
     attribute   serverConfig                config;
