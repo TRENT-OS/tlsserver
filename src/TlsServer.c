@@ -7,6 +7,7 @@
 #include "OS_Crypto.h"
 #include "OS_Tls.h"
 #include "OS_Network.h"
+#include "OS_NetworkStackClient.h"
 
 #include "LibDebug/Debug.h"
 
@@ -191,6 +192,18 @@ TlsLibServer_getClient()
     return getClient(TlsLibServer_get_sender_id());
 }
 
+static void
+init_network_client_api()
+{
+    static os_network_dataports_socket_t config;
+    static OS_Dataport_t dataport = OS_DATAPORT_ASSIGN(NwAppDataPort);
+
+    config.number_of_sockets = 1;
+
+    config.dataport = &dataport;
+    OS_NetworkStackClient_init(&config);
+}
+
 // Public functions ------------------------------------------------------------
 
 /*
@@ -223,6 +236,7 @@ int run()
     Debug_LOG_INFO("Starting up");
 
     OS_NetworkAPP_RT(NULL);
+    init_network_client_api();
     Debug_LOG_INFO("Networking initialized");
 
     strcpy(tlsCfg.library.crypto.caCert, config.trustedCert);
