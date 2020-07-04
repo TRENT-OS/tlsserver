@@ -5,7 +5,7 @@
  *
  */
 
-import <if_OS_socket.camkes>;
+import <if_OS_Socket.camkes>;
 import <if_OS_Tls.camkes>;
 import <if_OS_EntropySource.camkes>;
 
@@ -20,7 +20,7 @@ component TlsServer {
     control;
 
     // Networking interface
-    uses        if_OS_socket                network_stack_rpc;
+    uses        if_OS_Socket                network_stack_rpc;
     dataport    Buf                         NwAppDataPort;
     consumes    ServiceReady                event_network_stack_init_done;
 
