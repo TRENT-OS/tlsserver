@@ -101,7 +101,7 @@ send(
     size_t n;
 
     n = len > MAX_NW_SIZE ? MAX_NW_SIZE : len;
-    if ((err = OS_NetworkSocket_write(*hSocket, buf, &n)) != OS_SUCCESS)
+    if ((err = OS_NetworkSocket_write(*hSocket, buf, n, &n)) != OS_SUCCESS)
     {
         Debug_LOG_ERROR("Error during hSocket write...error:%d", err);
         return -1;
@@ -121,7 +121,7 @@ recv(
     size_t n;
 
     n = len > MAX_NW_SIZE ? MAX_NW_SIZE : len;
-    if ((err = OS_NetworkSocket_read(*hSocket, buf, &n)) != OS_SUCCESS)
+    if ((err = OS_NetworkSocket_read(*hSocket, buf, n, &n)) != OS_SUCCESS)
     {
         Debug_LOG_ERROR("Error during hSocket read...error:%d", err);
         return -1;
