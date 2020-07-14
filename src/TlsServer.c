@@ -72,8 +72,7 @@ typedef struct
     bool connected;
 } TlsServer_Client;
 
-// We can currently only have one client, because the OS supports only one
-// socket GLOBALLY. This will hopefully be fixed soon.
+// ToDo: We can currently only have one client
 #define TLS_CLIENTS_MAX 1
 
 // We limit the amount of data we send per call to the NW stack; this is a
@@ -171,7 +170,7 @@ getClient(
     // Before we acces the server state, make sure it is initialized.
     Debug_ASSERT_PRINTFLN(sem_init_wait() == 0, "Failed to wait for semaphore");
 
-    client = (id >= config.numClients) ? NULL :
+    client = (id >= TLS_CLIENTS_MAX) ? NULL :
              (serverState.clients[id].id != id) ? NULL :
              &serverState.clients[id];
 
@@ -228,10 +227,8 @@ int run()
     OS_Error_t err;
 
     // Check the configuration is somewhat sane
-    Debug_ASSERT(strlen(config.trustedCert) <= OS_Tls_SIZE_CA_CERT_MAX);
-    Debug_ASSERT(strlen(config.trustedCert)  > 0);
-    Debug_ASSERT(config.numClients <= TLS_CLIENTS_MAX);
-    Debug_ASSERT(config.numClients  > 0);
+    Debug_ASSERT(strlen(tlsServer_config.trustedCert) <= OS_Tls_SIZE_CA_CERT_MAX);
+    Debug_ASSERT(strlen(tlsServer_config.trustedCert)  > 0);
 
     Debug_LOG_INFO("Starting up");
 
@@ -239,8 +236,8 @@ int run()
     init_network_client_api();
     Debug_LOG_INFO("Networking initialized");
 
-    strcpy(tlsCfg.library.crypto.caCert, config.trustedCert);
-    for (size_t i = 0; i < config.numClients; i++)
+    strcpy(tlsCfg.library.crypto.caCert, tlsServer_config.trustedCert);
+    for (size_t i = 0; i < TLS_CLIENTS_MAX; i++)
     {
         client = &serverState.clients[i];
 
@@ -277,7 +274,7 @@ int run()
     Debug_ASSERT_PRINTFLN(sem_init_post() == 0, "Failed to post semaphore");
     Debug_ASSERT_PRINTFLN(sem_init_post() == 0, "Failed to post semaphore");
 
-    Debug_LOG_INFO("Initialized state(s) for %i clients", config.numClients);
+    Debug_LOG_INFO("Initialized state(s) for up to %i clients", TLS_CLIENTS_MAX);
 
     return 0;
 }

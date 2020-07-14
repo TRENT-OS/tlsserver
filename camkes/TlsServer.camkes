@@ -11,8 +11,7 @@ import <if_OS_EntropySource.camkes>;
 
 import "if_TlsServer.camkes";
 
-struct serverConfig {
-    int numClients;
+struct TlsServer_Config {
     string trustedCert;
 }
 
@@ -36,7 +35,7 @@ component TlsServer {
     dataport    Buf                         entropySource_dp;
 
     // Configure the TlsServer
-    attribute   serverConfig                config;
+    attribute   TlsServer_Config            tlsServer_config;
 
     // Semaphore for synching RPC threads with init process
     has         semaphore                   sem_init;
