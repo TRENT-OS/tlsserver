@@ -25,14 +25,15 @@ static int recv(void* ctx, unsigned char* buf, size_t len);
 static OS_Crypto_Config_t cryptoCfg =
 {
     .mode = OS_Crypto_MODE_LIBRARY_ONLY,
-    .library.entropy = OS_CRYPTO_ASSIGN_EntropySource(entropySource_rpc_read,
-                                                      entropySource_dp),
+    .library.entropy = OS_CRYPTO_ASSIGN_EntropySource(
+        entropySource_rpc_read,
+        entropySource_dp),
 
 };
 static OS_Tls_Config_t tlsCfg =
 {
     .mode = OS_Tls_MODE_SERVER,
-    .dataport = OS_DATAPORT_ASSIGN(TlsLibDataport),
+    .dataport = OS_DATAPORT_ASSIGN(tlsLib_dp),
     .library = {
         .socket = {
             .recv = recv,
@@ -195,7 +196,7 @@ static void
 init_network_client_api()
 {
     static OS_NetworkStackClient_SocketDataports_t config;
-    static OS_Dataport_t dataport = OS_DATAPORT_ASSIGN(NwAppDataPort);
+    static OS_Dataport_t dataport = OS_DATAPORT_ASSIGN(network_stack_dp);
 
     config.number_of_sockets = 1;
 
