@@ -168,14 +168,9 @@ getClient(
 {
     TlsServer_Client* client;
 
-    // Before we acces the server state, make sure it is initialized.
-    Debug_ASSERT_PRINTFLN(sem_init_wait() == 0, "Failed to wait for semaphore");
-
     client = (id >= TLS_CLIENTS_MAX) ? NULL :
              (serverState.clients[id].id != id) ? NULL :
              &serverState.clients[id];
-
-    Debug_ASSERT_PRINTFLN(sem_init_post() == 0, "Failed to post semaphore");
 
     return client;
 }
@@ -218,11 +213,8 @@ tls_rpc_getTls(
     return (NULL == client) ? NULL : client->hTls;
 }
 
-/*
- * The run function sets up the TLS/Crypto contexts per client and initializes
- * the whole network stack. After this is done, the thread exits.
- */
-int run()
+void
+post_init()
 {
     TlsServer_Client* client;
     OS_Error_t err;
@@ -250,8 +242,8 @@ int run()
         // Create Crypto instance
         if ((err = OS_Crypto_init(&client->hCrypto, &cryptoCfg)) != OS_SUCCESS)
         {
-            Debug_LOG_ERROR("Failed to init Crypto API instance [err=%i]", err);
-            return err;
+            Debug_LOG_ERROR("OS_Crypto_init() failed with %d", err);
+            return;
         }
 
         // We have the crypto set up here already, but the socket will be connected
@@ -260,24 +252,12 @@ int run()
         tlsCfg.library.socket.context = &client->hSocket;
         if ((err = OS_Tls_init(&client->hTls, &tlsCfg)) != OS_SUCCESS)
         {
-            Debug_LOG_ERROR("Failed to init TLS API instance [err=%i]", err);
-            return err;
+            Debug_LOG_ERROR("OS_Tls_init() failed with %d", err);
+            return;
         }
     }
 
-    /*
-     * We have to post twice, because we may have the two RPC threads for the
-     * two interfaces waiting in parallel for the init to complete. The two
-     * interfaces are:
-     * 1. tlsServer_rpc      (implemented here)
-     * 2. tls_rpc   (provided via the RPC server module of the TLS API)
-     */
-    Debug_ASSERT_PRINTFLN(sem_init_post() == 0, "Failed to post semaphore");
-    Debug_ASSERT_PRINTFLN(sem_init_post() == 0, "Failed to post semaphore");
-
     Debug_LOG_INFO("Initialized state(s) for up to %i clients", TLS_CLIENTS_MAX);
-
-    return 0;
 }
 
 OS_Error_t

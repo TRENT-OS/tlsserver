@@ -21,8 +21,6 @@ struct TlsServer_Config {
 #define DECLARE_COMPONENT_TlsServer(_name_)                                     \
                                                                                 \
     component _name_ {                                                          \
-        control;                                                                \
-                                                                                \
         dataport    Buf                     network_stack_dp;                   \
         uses        if_OS_Socket            network_stack_rpc;                  \
         consumes    ServiceReady            event_network_stack_init_done;      \
@@ -36,8 +34,6 @@ struct TlsServer_Config {
         uses        if_OS_EntropySource     entropySource_rpc;                  \
                                                                                 \
         attribute   TlsServer_Config        tlsServer_config;                   \
-                                                                                \
-        has         semaphore               sem_init;                           \
     }
 
 
@@ -116,15 +112,6 @@ struct TlsServer_Config {
 
 
 //------------------------------------------------------------------------------
-// Initialize sempahore
-
-#define INIT_SEMAPHORES_TlsServer(  \
-    _inst_)                         \
-                                    \
-    _inst_.sem_init = 0;
-
-
-//------------------------------------------------------------------------------
 // Configuration of instance
 
 #define CONFIGURE_INSTANCE_TlsServer(   \
@@ -134,4 +121,3 @@ struct TlsServer_Config {
     _inst_.tlsServer_config = {         \
         "trustedCert" : _cert_          \
     };
-
