@@ -75,7 +75,7 @@ struct TlsServer_Config {
             from    _inst_.network_stack_dp,                                    \
             to      _nw_dp_                                                     \
         );                                                                      \
-    connection seL4Notification                                                 \
+    connection seL4NotificationNative                                           \
         _name_ ## _ ## _inst_ ## _nw_ev (                                       \
             from    _nw_ev_,                                                    \
             to      _inst_.event_network_stack_init_done                        \
