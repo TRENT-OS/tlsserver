@@ -14,6 +14,7 @@
 #include "OS_Tls.h"
 
 #include <stdint.h>
+#include <camkes.h>
 
 /**
  * @brief Connect clien'ts socket to a remote host
@@ -34,7 +35,10 @@
 OS_Error_t
 TlsServer_connect(
     const char*    host,
-    const uint16_t port);
+    const uint16_t port)
+{
+    return tlsServer_rpc_connect(host, port);
+}
 
 /**
  * @brief Disconnect socket
@@ -50,6 +54,9 @@ TlsServer_connect(
  */
 OS_Error_t
 TlsServer_disconnect(
-    void);
+    void)
+{
+    return tlsServer_rpc_disconnect();
+}
 
 /** @} */

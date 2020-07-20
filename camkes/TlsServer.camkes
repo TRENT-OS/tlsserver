@@ -24,7 +24,7 @@ component TlsServer {
     consumes    ServiceReady                event_network_stack_init_done;
 
     // TlsServer interface to connect/disconnect sockets
-    provides    if_TlsServer                TlsServer;
+    provides    if_TlsServer                tlsServer_rpc;
 
     // TlsLibServer interface for TLS library implementation
     provides    if_OS_Tls                   TlsLibServer;

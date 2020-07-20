@@ -60,7 +60,7 @@ static OS_Tls_Config_t tlsCfg =
  * IDs must be same for each interface user on both interfaces, see also the
  * comment below.
  */
-seL4_Word TlsServer_get_sender_id(void);
+seL4_Word tlsServer_rpc_get_sender_id(void);
 seL4_Word TlsLibServer_get_sender_id(void);
 
 typedef struct
@@ -132,7 +132,7 @@ recv(
 /*
  * Here we map the RPC client to his respective data structures. What is important
  * to understand is that the TlsServer offers TWO interfaces:
- * 1. The TlsServer interface, as explicitly defined in the relevant CAmkES
+ * 1. The tlsServer_rpc interface, as explicitly defined in the relevant CAmkES
  *    file and as visible in TlsServer.h and this file.
  * 2. The TlsLibServer interface, due to the fact that this component is
  *    linked with OS_TLS_WITH_RCP_SERVER and thus contains the TLS API
@@ -140,7 +140,7 @@ recv(
  * Mapping to the data structure is based on the numeric "sender ID" which each
  * CAmkES call to an interface provides. However, we need to ensure that
  * sender IDs are the same for each RPC client ON BOTH INTERFACES. If it is not
- * so, one component initializes data structures with ID=1 via the TlsServer
+ * so, one component initializes data structures with ID=1 via the tlsServer_rpc
  * interface, and then uses data structures with ID=2 (or whatever) via the
  * TlsLibServer interface! This mismatch leads to problems.
  *
@@ -180,9 +180,9 @@ getClient(
 }
 
 static TlsServer_Client*
-TlsServer_getClient()
+tlsServer_rpc_getClient()
 {
-    return getClient(TlsServer_get_sender_id());
+    return getClient(tlsServer_rpc_get_sender_id());
 }
 
 static TlsServer_Client*
@@ -268,7 +268,7 @@ int run()
      * We have to post twice, because we may have the two RPC threads for the
      * two interfaces waiting in parallel for the init to complete. The two
      * interfaces are:
-     * 1. TlsServer      (implemented here)
+     * 1. tlsServer_rpc      (implemented here)
      * 2. TlsLibServer   (provided via the RPC server module of the TLS API)
      */
     Debug_ASSERT_PRINTFLN(sem_init_post() == 0, "Failed to post semaphore");
@@ -280,7 +280,7 @@ int run()
 }
 
 OS_Error_t
-TlsServer_connect(
+tlsServer_rpc_connect(
     const char*    host,
     const uint16_t port)
 {
@@ -307,7 +307,7 @@ TlsServer_connect(
         Debug_LOG_ERROR("Port number is invalid");
         return OS_ERROR_INVALID_PARAMETER;
     }
-    if ((client = TlsServer_getClient()) == NULL)
+    if ((client = tlsServer_rpc_getClient()) == NULL)
     {
         Debug_LOG_ERROR("Could not get corresponding client state");
         return OS_ERROR_NOT_FOUND;
@@ -334,13 +334,13 @@ TlsServer_connect(
 }
 
 OS_Error_t
-TlsServer_disconnect(
+tlsServer_rpc_disconnect(
     void)
 {
     OS_Error_t err;
     TlsServer_Client* client;
 
-    if ((client = TlsServer_getClient()) == NULL)
+    if ((client = tlsServer_rpc_getClient()) == NULL)
     {
         Debug_LOG_ERROR("Could not get corresponding client state");
         return OS_ERROR_NOT_FOUND;
