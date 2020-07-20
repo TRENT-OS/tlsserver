@@ -32,6 +32,7 @@
  * @retval OS_ERROR_INVALID_STATE if the socket is already connected
  * @retval OS_ERROR_NOT_FOUND if the state of the RPC client could not be found
  */
+__attribute__((unused))
 OS_Error_t
 TlsServer_connect(
     const char*    host,
@@ -52,6 +53,7 @@ TlsServer_connect(
  * @retval OS_ERROR_INVALID_STATE if the socket is already connected
  * @retval OS_ERROR_NOT_FOUND if the state of the RPC client could not be found
  */
+__attribute__((unused))
 OS_Error_t
 TlsServer_disconnect(
     void)
