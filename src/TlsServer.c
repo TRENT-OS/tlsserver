@@ -33,7 +33,7 @@ static OS_Crypto_Config_t cryptoCfg =
 static OS_Tls_Config_t tlsCfg =
 {
     .mode = OS_Tls_MODE_SERVER,
-    .dataport = OS_DATAPORT_ASSIGN(tlsLib_dp),
+    .dataport = OS_DATAPORT_ASSIGN(tls_port),
     .library = {
         .socket = {
             .recv = recv,
@@ -62,7 +62,7 @@ static OS_Tls_Config_t tlsCfg =
  * comment below.
  */
 seL4_Word tlsServer_rpc_get_sender_id(void);
-seL4_Word TlsLibServer_get_sender_id(void);
+seL4_Word tls_rpc_get_sender_id(void);
 
 typedef struct
 {
@@ -135,7 +135,7 @@ recv(
  * to understand is that the TlsServer offers TWO interfaces:
  * 1. The tlsServer_rpc interface, as explicitly defined in the relevant CAmkES
  *    file and as visible in TlsServer.h and this file.
- * 2. The TlsLibServer interface, due to the fact that this component is
+ * 2. The tls_rpc interface, due to the fact that this component is
  *    linked with OS_TLS_WITH_RCP_SERVER and thus contains the TLS API
  *    LIB and RPC Server code.
  * Mapping to the data structure is based on the numeric "sender ID" which each
@@ -143,7 +143,7 @@ recv(
  * sender IDs are the same for each RPC client ON BOTH INTERFACES. If it is not
  * so, one component initializes data structures with ID=1 via the tlsServer_rpc
  * interface, and then uses data structures with ID=2 (or whatever) via the
- * TlsLibServer interface! This mismatch leads to problems.
+ * tls_rpc interface! This mismatch leads to problems.
  *
  * The way to make sure both IDs are the same, is to explicitly assign the IDs
  * in a configuration:
@@ -156,9 +156,9 @@ recv(
  *      }
  *      configuration{
  *          testApp_1.TlsServer_attributes      = 0;
- *          testApp_1.TlsLibServer_attributes   = 0;
+ *          testApp_1.tls_rpc_attributes   = 0;
  *          testApp_2.TlsServer_attributes      = 1;
- *          testApp_2.TlsLibServer_attributes   = 1;
+ *          testApp_2.tls_rpc_attributes   = 1;
  *      }
  *  }
  */
@@ -187,9 +187,9 @@ tlsServer_rpc_getClient()
 }
 
 static TlsServer_Client*
-TlsLibServer_getClient()
+tls_rpc_getClient()
 {
-    return getClient(TlsLibServer_get_sender_id());
+    return getClient(tls_rpc_get_sender_id());
 }
 
 static void
@@ -211,10 +211,10 @@ init_network_client_api()
  * we have only one client here, so it is easy.
  */
 OS_Tls_Handle_t
-TlsLibServer_getTls(
+tls_rpc_getTls(
     void)
 {
-    TlsServer_Client* client = TlsLibServer_getClient();
+    TlsServer_Client* client = tls_rpc_getClient();
     return (NULL == client) ? NULL : client->hTls;
 }
 
@@ -270,7 +270,7 @@ int run()
      * two interfaces waiting in parallel for the init to complete. The two
      * interfaces are:
      * 1. tlsServer_rpc      (implemented here)
-     * 2. TlsLibServer   (provided via the RPC server module of the TLS API)
+     * 2. tls_rpc   (provided via the RPC server module of the TLS API)
      */
     Debug_ASSERT_PRINTFLN(sem_init_post() == 0, "Failed to post semaphore");
     Debug_ASSERT_PRINTFLN(sem_init_post() == 0, "Failed to post semaphore");

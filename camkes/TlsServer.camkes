@@ -29,8 +29,8 @@ struct TlsServer_Config {
                                                                                 \
         provides    if_TlsServer            tlsServer_rpc;                      \
                                                                                 \
-        dataport    Buf                     tlsLib_dp;                          \
-        provides    if_OS_Tls               TlsLibServer;                       \
+        dataport    Buf                     tls_port;                           \
+        provides    if_OS_Tls               tls_rpc;                            \
                                                                                 \
         dataport    Buf                     entropySource_dp;                   \
         uses        if_OS_EntropySource     entropySource_rpc;                  \
@@ -88,12 +88,12 @@ struct TlsServer_Config {
     connection seL4RPCCall                                                      \
         _name_ ## _ ## _inst_ ## _tls_rpc (                                     \
             from    _tls_rpc_,                                                  \
-            to      _inst_.TlsLibServer                                         \
+            to      _inst_.tls_rpc                                              \
         );                                                                      \
     connection seL4SharedData                                                   \
         _name_ ## _ ## _inst_ ## _tls_dp (                                      \
             from    _tls_dp_,                                                   \
-            to      _inst_.tlsLib_dp                                            \
+            to      _inst_.tls_port                                             \
         );                                                                      \
     connection seL4RPCCall                                                      \
         _name_ ## _ ## _inst_ ## _server_rpc (                                  \
