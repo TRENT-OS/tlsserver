@@ -7,7 +7,7 @@
 
 import <if_OS_Socket.camkes>;
 import <if_OS_Tls.camkes>;
-import <if_OS_EntropySource.camkes>;
+import <if_OS_Entropy.camkes>;
 
 import <TlsServer/camkes/if_TlsServer.camkes>;
 
@@ -31,7 +31,7 @@ struct TlsServer_Config {
         provides    if_OS_Tls               tls_rpc;                            \
                                                                                 \
         dataport    Buf                     entropySource_dp;                   \
-        uses        if_OS_EntropySource     entropySource_rpc;                  \
+        uses        if_OS_Entropy           entropySource_rpc;                  \
                                                                                 \
         attribute   TlsServer_Config        tlsServer_config;                   \
     }
