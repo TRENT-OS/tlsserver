@@ -30,8 +30,8 @@ struct TlsServer_Config {
         dataport    Buf                     tls_port;                           \
         provides    if_OS_Tls               tls_rpc;                            \
                                                                                 \
-        dataport    Buf                     entropySource_dp;                   \
-        uses        if_OS_Entropy           entropySource_rpc;                  \
+        dataport    Buf                     entropy_port;                       \
+        uses        if_OS_Entropy           entropy_rpc;                        \
                                                                                 \
         attribute   TlsServer_Config        tlsServer_config;                   \
     }
@@ -56,12 +56,12 @@ struct TlsServer_Config {
                                                                                 \
     connection  seL4RPCCall                                                     \
         _name_ ## _ ## _inst_ ## _entropy_rpc (                                 \
-            from    _inst_.entropySource_rpc,                                   \
+            from    _inst_.entropy_rpc,                                         \
             to      _entropy_rpc_                                               \
         );                                                                      \
     connection seL4SharedData                                                   \
         _name_ ## _ ## _inst_ ## _entropy_dp (                                  \
-            from    _inst_.entropySource_dp,                                    \
+            from    _inst_.entropy_port,                                        \
             to      _entropy_dp_                                                \
         );                                                                      \
                                                                                 \
