@@ -76,9 +76,4 @@ function(DeclareCAmkESComponent_TlsServer name)
             ${OS_COMPONENT_TlsServer_DIR}/client/include
     )
 
-    target_link_libraries(${PROJECT_NAME}
-        INTERFACE
-            os_tls_with_rpc_client
-    )
-
 endfunction()

@@ -6,7 +6,6 @@
  */
 
 import <if_OS_Socket.camkes>;
-import <if_OS_Tls.camkes>;
 import <if_OS_Entropy.camkes>;
 
 import <TlsServer/camkes/if_TlsServer.camkes>;
@@ -26,9 +25,7 @@ struct TlsServer_Config {
         consumes    ServiceReady            event_network_stack_init_done;      \
                                                                                 \
         provides    if_TlsServer            tlsServer_rpc;                      \
-                                                                                \
-        dataport    Buf                     tls_port;                           \
-        provides    if_OS_Tls               tls_rpc;                            \
+        dataport    Buf                     tlsServer_port;                     \
                                                                                 \
         dataport    Buf                     entropy_port;                       \
         uses        if_OS_Entropy           entropy_rpc;                        \
@@ -48,9 +45,8 @@ struct TlsServer_Config {
     _nw_rpc_,                                                                   \
     _nw_dp_,                                                                    \
     _nw_ev_,                                                                    \
-    _tls_rpc_,                                                                  \
-    _tls_dp_,                                                                   \
-    _server_rpc_)                                                               \
+    _tlsServer_rpc_,                                                            \
+    _tlsServer_dp_)                                                             \
                                                                                 \
     component   _name_  _inst_;                                                 \
                                                                                 \
@@ -82,19 +78,14 @@ struct TlsServer_Config {
         );                                                                      \
                                                                                 \
     connection seL4RPCCall                                                      \
-        _name_ ## _ ## _inst_ ## _tls_rpc (                                     \
-            from    _tls_rpc_,                                                  \
-            to      _inst_.tls_rpc                                              \
+        _name_ ## _ ## _inst_ ## _tlsServer_rpc (                               \
+            from    _tlsServer_rpc_,                                            \
+            to      _inst_.tlsServer_rpc                                        \
         );                                                                      \
     connection seL4SharedData                                                   \
-        _name_ ## _ ## _inst_ ## _tls_dp (                                      \
-            from    _tls_dp_,                                                   \
-            to      _inst_.tls_port                                             \
-        );                                                                      \
-    connection seL4RPCCall                                                      \
-        _name_ ## _ ## _inst_ ## _server_rpc (                                  \
-            from    _server_rpc_,                                               \
-            to      _inst_.tlsServer_rpc                                        \
+        _name_ ## _ ## _inst_ ## _tlsServer_dp (                                \
+            from    _tlsServer_dp_,                                             \
+            to      _inst_.tlsServer_port                                       \
         );
 
 
@@ -103,12 +94,10 @@ struct TlsServer_Config {
 
 #define ASSIGN_CLIENT_BADGE_TlsServer(              \
     _client_,                                       \
-    _server_rpc_,                                   \
-    _tls_rpc_,                                      \
+    _tlsServer_rpc_,                                \
     _val_)                                          \
                                                     \
-    _client_._server_rpc_ ## _attributes = _val_;   \
-    _client_._tls_rpc_ ## _attributes = _val_;
+    _client_._tlsServer_rpc_ ## _attributes = _val_;
 
 
 //------------------------------------------------------------------------------

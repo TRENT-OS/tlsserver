@@ -5,8 +5,12 @@
  *
  */
 
+#include "if_OS_Tls.camkes.h"
+
 procedure if_TlsServer {
     include "OS_Error.h";
+
+    IF_OS_TLS_CAMKES
 
     OS_Error_t
     connect(

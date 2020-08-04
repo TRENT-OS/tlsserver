@@ -2,8 +2,6 @@
  * Copyright (C) 2020, Hensoldt Cyber GmbH
  */
 
-#include "TlsServer.h"
-
 #include "OS_Crypto.h"
 #include "OS_Tls.h"
 #include "OS_Network.h"
@@ -22,6 +20,9 @@ extern OS_Error_t OS_NetworkAPP_RT(OS_Network_Context_t ctx);
 static int send(void* ctx, const unsigned char* buf, size_t len);
 static int recv(void* ctx, unsigned char* buf, size_t len);
 
+// Dataport for RPC comms
+static OS_Dataport_t port = OS_DATAPORT_ASSIGN(tlsServer_port);
+
 static OS_Crypto_Config_t cryptoCfg =
 {
     .mode = OS_Crypto_MODE_LIBRARY_ONLY,
@@ -32,8 +33,7 @@ static OS_Crypto_Config_t cryptoCfg =
 };
 static OS_Tls_Config_t tlsCfg =
 {
-    .mode = OS_Tls_MODE_SERVER,
-    .dataport = OS_DATAPORT_ASSIGN(tls_port),
+    .mode = OS_Tls_MODE_LIBRARY,
     .library = {
         .socket = {
             .recv = recv,
@@ -50,19 +50,7 @@ static OS_Tls_Config_t tlsCfg =
     }
 };
 
-/*
- * These are auto-generated based on interface names; they give unique ID
- * assigned to the user of the interface.
- *
- * Sender IDs can be assigned via a configuration for each interface/user
- * individually, when following this convention:
- *   <interface_user>.<interface>_attributes = ID
- *
- * IDs must be same for each interface user on both interfaces, see also the
- * comment below.
- */
 seL4_Word tlsServer_rpc_get_sender_id(void);
-seL4_Word tls_rpc_get_sender_id(void);
 
 typedef struct
 {
@@ -130,38 +118,6 @@ recv(
     return n;
 }
 
-/*
- * Here we map the RPC client to his respective data structures. What is important
- * to understand is that the TlsServer offers TWO interfaces:
- * 1. The tlsServer_rpc interface, as explicitly defined in the relevant CAmkES
- *    file and as visible in TlsServer.h and this file.
- * 2. The tls_rpc interface, due to the fact that this component is
- *    linked with OS_TLS_WITH_RCP_SERVER and thus contains the TLS API
- *    LIB and RPC Server code.
- * Mapping to the data structure is based on the numeric "sender ID" which each
- * CAmkES call to an interface provides. However, we need to ensure that
- * sender IDs are the same for each RPC client ON BOTH INTERFACES. If it is not
- * so, one component initializes data structures with ID=1 via the tlsServer_rpc
- * interface, and then uses data structures with ID=2 (or whatever) via the
- * tls_rpc interface! This mismatch leads to problems.
- *
- * The way to make sure both IDs are the same, is to explicitly assign the IDs
- * in a configuration:
- *
- *  assembly {
- *      composition {
- *          component   TestApp_1   testApp_1;
- *          component   TestApp_2   testApp_2;
- *          ...
- *      }
- *      configuration{
- *          testApp_1.TlsServer_attributes      = 0;
- *          testApp_1.tls_rpc_attributes   = 0;
- *          testApp_2.TlsServer_attributes      = 1;
- *          testApp_2.tls_rpc_attributes   = 1;
- *      }
- *  }
- */
 static TlsServer_Client*
 getClient(
     seL4_Word id)
@@ -181,12 +137,6 @@ tlsServer_rpc_getClient()
     return getClient(tlsServer_rpc_get_sender_id());
 }
 
-static TlsServer_Client*
-tls_rpc_getClient()
-{
-    return getClient(tls_rpc_get_sender_id());
-}
-
 static void
 init_network_client_api()
 {
@@ -200,18 +150,6 @@ init_network_client_api()
 }
 
 // Public functions ------------------------------------------------------------
-
-/*
- * We need to give the TLS RPC Server the context to use for a specific client;
- * we have only one client here, so it is easy.
- */
-OS_Tls_Handle_t
-tls_rpc_getTls(
-    void)
-{
-    TlsServer_Client* client = tls_rpc_getClient();
-    return (NULL == client) ? NULL : client->hTls;
-}
 
 void
 post_init()
@@ -259,6 +197,8 @@ post_init()
 
     Debug_LOG_INFO("Initialized state(s) for up to %i clients", TLS_CLIENTS_MAX);
 }
+
+// TlsServer specific interface functions --------------------------------------
 
 OS_Error_t
 tlsServer_rpc_connect(
@@ -341,4 +281,66 @@ tlsServer_rpc_disconnect(
     client->connected = false;
 
     return OS_SUCCESS;
+}
+
+// if_OS_Tls interface functions -----------------------------------------------
+
+OS_Error_t
+tlsServer_rpc_handshake(
+    void)
+{
+    TlsServer_Client* client;
+
+    if ((client = tlsServer_rpc_getClient()) == NULL)
+    {
+        Debug_LOG_ERROR("Could not get corresponding client state");
+        return OS_ERROR_NOT_FOUND;
+    }
+
+    return OS_Tls_handshake(client->hTls);
+}
+
+OS_Error_t
+tlsServer_rpc_write(
+    size_t dataSize)
+{
+    TlsServer_Client* client;
+
+    if ((client = tlsServer_rpc_getClient()) == NULL)
+    {
+        Debug_LOG_ERROR("Could not get corresponding client state");
+        return OS_ERROR_NOT_FOUND;
+    }
+
+    return OS_Tls_write(client->hTls, OS_Dataport_getBuf(port), dataSize);
+}
+
+OS_Error_t
+tlsServer_rpc_read(
+    size_t* dataSize)
+{
+    TlsServer_Client* client;
+
+    if ((client = tlsServer_rpc_getClient()) == NULL)
+    {
+        Debug_LOG_ERROR("Could not get corresponding client state");
+        return OS_ERROR_NOT_FOUND;
+    }
+
+    return OS_Tls_read(client->hTls, OS_Dataport_getBuf(port), dataSize);
+}
+
+OS_Error_t
+tlsServer_rpc_reset(
+    void)
+{
+    TlsServer_Client* client;
+
+    if ((client = tlsServer_rpc_getClient()) == NULL)
+    {
+        Debug_LOG_ERROR("Could not get corresponding client state");
+        return OS_ERROR_NOT_FOUND;
+    }
+
+    return OS_Tls_reset(client->hTls);
 }
