@@ -46,20 +46,15 @@ function(DeclareCAmkESComponent_TlsServer name)
 
     #---------------------------------------------------------------------------
     DeclareCAmkESComponent(${name}
-        INCLUDES
-            # we state this folder explicitly and don't put TlsServer_client
-            # into the libs, because it's semantically broken when the server
-            # uses the client lib.
-            ${OS_COMPONENT_TlsServer_DIR}/inc
         SOURCES
-            ${OS_COMPONENT_TlsServer_DIR}/src/TlsServer.c
+            ${OS_COMPONENT_TlsServer_DIR}/server/src/tlsServer_rpc.c
         C_FLAGS
             -Wall
             -Werror
         LIBS
             os_core_api
             os_libs
-            os_tls_with_rpc_server
+            os_tls
             ${TLS_SERVER_LIBS}
     )
 
@@ -71,9 +66,14 @@ function(DeclareCAmkESComponent_TlsServer name)
 
     add_library(${PROJECT_NAME} INTERFACE)
 
+    target_sources(${PROJECT_NAME}
+        INTERFACE
+            ${OS_COMPONENT_TlsServer_DIR}/client/src/TlsServer.c
+    )
+
     target_include_directories(${PROJECT_NAME}
         INTERFACE
-            ${OS_COMPONENT_TlsServer_DIR}/inc
+            ${OS_COMPONENT_TlsServer_DIR}/client/include
     )
 
     target_link_libraries(${PROJECT_NAME}

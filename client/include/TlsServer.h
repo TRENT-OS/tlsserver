@@ -14,14 +14,12 @@
 #include "OS_Tls.h"
 
 #include <stdint.h>
-#include <camkes.h>
 
 /**
  * @brief Connect clien'ts socket to a remote host
  *
  * The TlsServer has one socket per RPC client. Before a TLS connection can be
- * used via the TlsLibServer RPC interface, the respective socket has to be
- * connected via this function.
+ * used, the respective socket has to be connected via this function.
  *
  * @param host (required) IP address of the remote host
  * @param port (required) Port number to use
@@ -32,14 +30,10 @@
  * @retval OS_ERROR_INVALID_STATE if the socket is already connected
  * @retval OS_ERROR_NOT_FOUND if the state of the RPC client could not be found
  */
-__attribute__((unused))
 OS_Error_t
 TlsServer_connect(
     const char*    host,
-    const uint16_t port)
-{
-    return tlsServer_rpc_connect(host, port);
-}
+    const uint16_t port);
 
 /**
  * @brief Disconnect socket
@@ -53,12 +47,8 @@ TlsServer_connect(
  * @retval OS_ERROR_INVALID_STATE if the socket is already connected
  * @retval OS_ERROR_NOT_FOUND if the state of the RPC client could not be found
  */
-__attribute__((unused))
 OS_Error_t
 TlsServer_disconnect(
-    void)
-{
-    return tlsServer_rpc_disconnect();
-}
+    void);
 
 /** @} */
