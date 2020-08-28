@@ -13,6 +13,8 @@
 
 #include "OS_Tls.h"
 
+#include "if_TlsServer.h"
+
 #include <stdint.h>
 
 /**
@@ -21,6 +23,7 @@
  * The TlsServer has one socket per RPC client. Before a TLS connection can be
  * used, the respective socket has to be connected via this function.
  *
+ * @param rpc (required) pointer to CAmkES rpc struct
  * @param host (required) IP address of the remote host
  * @param port (required) Port number to use
  *
@@ -32,14 +35,17 @@
  */
 OS_Error_t
 TlsServer_connect(
-    const char*    host,
-    const uint16_t port);
+    const if_TlsServer_t* rpc,
+    const char*           host,
+    const uint16_t        port);
 
 /**
  * @brief Disconnect socket
  *
  * If a client's socket is connected to a remote host, this function will terminate
  * the connection and close the socket.
+ *
+ * @param rpc (required) pointer to CAmkES rpc struct
  *
  * @return an error code
  * @retval OS_SUCCESS if operation succeeded
@@ -49,6 +55,6 @@ TlsServer_connect(
  */
 OS_Error_t
 TlsServer_disconnect(
-    void);
+    const if_TlsServer_t* rpc);
 
 /** @} */

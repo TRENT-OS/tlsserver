@@ -1,22 +1,27 @@
 /* Copyright (C) 2020, Hensoldt Cyber GmbH */
 
-#include "OS_Tls.h"
-
-#include <stdint.h>
-
-#include <camkes.h>
+#include "TlsServer.h"
 
 OS_Error_t
 TlsServer_connect(
-    const char*    host,
-    const uint16_t port)
+    const if_TlsServer_t* rpc,
+    const char*           host,
+    const uint16_t        port)
 {
-    return tlsServer_rpc_connect(host, port);
+    if (NULL == rpc)
+    {
+        return OS_ERROR_INVALID_PARAMETER;
+    }
+    return rpc->connect(host, port);
 }
 
 OS_Error_t
 TlsServer_disconnect(
-    void)
+    const if_TlsServer_t* rpc)
 {
-    return tlsServer_rpc_disconnect();
+    if (NULL == rpc)
+    {
+        return OS_ERROR_INVALID_PARAMETER;
+    }
+    return rpc->disconnect();
 }
