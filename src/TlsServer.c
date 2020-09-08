@@ -92,16 +92,16 @@ static TlsServer_State serverState;
 
 static int
 send(
-    void*                ctx,
+    void*                p,
     const unsigned char* buf,
     size_t               len)
 {
     OS_Error_t err;
-    OS_NetworkSocket_Handle_t* hSocket = (OS_NetworkSocket_Handle_t*) ctx;
+    TlsServer_Client* ctx = (TlsServer_Client*) p;
     size_t n;
 
     n = len > MAX_NW_SIZE ? MAX_NW_SIZE : len;
-    if ((err = OS_NetworkSocket_write(*hSocket, buf, n, &n)) != OS_SUCCESS)
+    if ((err = OS_NetworkSocket_write(ctx->hSocket, buf, n, &n)) != OS_SUCCESS)
     {
         Debug_LOG_ERROR("Error during hSocket write...error:%d", err);
         return -1;
@@ -112,16 +112,16 @@ send(
 
 static int
 recv(
-    void*          ctx,
+    void*          p,
     unsigned char* buf,
     size_t         len)
 {
     OS_Error_t err;
-    OS_NetworkSocket_Handle_t* hSocket = (OS_NetworkSocket_Handle_t*) ctx;
+    TlsServer_Client* ctx = (TlsServer_Client*) p;
     size_t n;
 
     n = len > MAX_NW_SIZE ? MAX_NW_SIZE : len;
-    if ((err = OS_NetworkSocket_read(*hSocket, buf, n, &n)) != OS_SUCCESS)
+    if ((err = OS_NetworkSocket_read(ctx->hSocket, buf, n, &n)) != OS_SUCCESS)
     {
         Debug_LOG_ERROR("Error during hSocket read...error:%d", err);
         return -1;
@@ -249,7 +249,7 @@ post_init()
         // We have the crypto set up here already, but the socket will be connected
         // later when the user calls connect()
         tlsCfg.library.crypto.handle  = client->hCrypto;
-        tlsCfg.library.socket.context = &client->hSocket;
+        tlsCfg.library.socket.context = client;
         if ((err = OS_Tls_init(&client->hTls, &tlsCfg)) != OS_SUCCESS)
         {
             Debug_LOG_ERROR("OS_Tls_init() failed with %d", err);
