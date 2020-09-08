@@ -96,9 +96,24 @@ send(
     const unsigned char* buf,
     size_t               len)
 {
+    static int retry = 0;
     OS_Error_t err;
     TlsServer_Client* ctx = (TlsServer_Client*) p;
     size_t n;
+
+    Debug_LOG_INFO("send() should write %zd bytes", len);
+
+    retry++;
+    if (retry % 3 == 0)
+    {
+        Debug_LOG_INFO("send() will return OS_Tls_SOCKET_WRITE_WOULD_BLOCK");
+        return OS_Tls_SOCKET_WRITE_WOULD_BLOCK;
+    }
+    else if (retry % 3 == 1 && len > 1)
+    {
+        len >>= 1;
+        Debug_LOG_INFO("send() will actually write %zd bytes", len);
+    }
 
     n = len > MAX_NW_SIZE ? MAX_NW_SIZE : len;
     if ((err = OS_NetworkSocket_write(ctx->hSocket, buf, n, &n)) != OS_SUCCESS)
@@ -116,9 +131,24 @@ recv(
     unsigned char* buf,
     size_t         len)
 {
+    static int retry = 0;
     OS_Error_t err;
     TlsServer_Client* ctx = (TlsServer_Client*) p;
     size_t n;
+
+    Debug_LOG_INFO("recv() should read %zd bytes", len);
+
+    retry++;
+    if (retry % 3 == 0)
+    {
+        Debug_LOG_INFO("recv() will return OS_Tls_SOCKET_READ_WOULD_BLOCK");
+        return OS_Tls_SOCKET_READ_WOULD_BLOCK;
+    }
+    else if (retry % 3 == 1 && len > 1)
+    {
+        len >>= 1;
+        Debug_LOG_INFO("recv() will actually read %zd bytes", len);
+    }
 
     n = len > MAX_NW_SIZE ? MAX_NW_SIZE : len;
     if ((err = OS_NetworkSocket_read(ctx->hSocket, buf, n, &n)) != OS_SUCCESS)
