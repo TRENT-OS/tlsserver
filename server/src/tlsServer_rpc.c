@@ -28,9 +28,6 @@ extern OS_Error_t OS_NetworkAPP_RT(OS_Network_Context_t ctx);
 static int send(void* ctx, const unsigned char* buf, size_t len);
 static int recv(void* ctx, unsigned char* buf, size_t len);
 
-// Dataport for RPC comms
-static OS_Dataport_t port = OS_DATAPORT_ASSIGN(tlsServer_port);
-
 static OS_Crypto_Config_t cryptoCfg =
 {
     .mode = OS_Crypto_MODE_LIBRARY_ONLY,
@@ -65,6 +62,7 @@ typedef struct
     unsigned int id;
     OS_Tls_Handle_t hTls;
     OS_Crypto_Handle_t hCrypto;
+    OS_Dataport_t dataport;
     OS_NetworkSocket_Handle_t hSocket;
     bool connected;
 } TlsServer_Client;
@@ -82,7 +80,12 @@ typedef struct
 } TlsServer_State;
 
 // Here we keep track of all the respective contexts for the RPC clients
-static TlsServer_State serverState;
+static TlsServer_State serverState =
+{
+    .clients[0] = {
+        .dataport = OS_DATAPORT_ASSIGN(tlsServer_port)
+    }
+};
 
 // Private static functions ----------------------------------------------------
 
@@ -301,7 +304,7 @@ tlsServer_rpc_write(
 
     GET_CLIENT(client, tlsServer_rpc_get_sender_id());
 
-    return OS_Tls_write(client->hTls, OS_Dataport_getBuf(port), dataSize);
+    return OS_Tls_write(client->hTls, OS_Dataport_getBuf(client->dataport), dataSize);
 }
 
 OS_Error_t
@@ -312,7 +315,7 @@ tlsServer_rpc_read(
 
     GET_CLIENT(client, tlsServer_rpc_get_sender_id());
 
-    return OS_Tls_read(client->hTls, OS_Dataport_getBuf(port), dataSize);
+    return OS_Tls_read(client->hTls, OS_Dataport_getBuf(client->dataport), dataSize);
 }
 
 OS_Error_t
