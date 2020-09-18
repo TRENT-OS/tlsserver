@@ -13,6 +13,14 @@
 #include <stdint.h>
 #include <string.h>
 
+// Get a client when called via RPC
+#define GET_CLIENT(cli, cid)                                                \
+    if ((cli = getClient(cid)) == NULL)                                     \
+    {                                                                       \
+        Debug_LOG_ERROR("Could not get state for client with id %i", cid);  \
+        return OS_ERROR_NOT_FOUND;                                          \
+    }
+
 // We need this to wait for NW to complete init process
 extern OS_Error_t OS_NetworkAPP_RT(OS_Network_Context_t ctx);
 
@@ -131,12 +139,6 @@ getClient(
     return client;
 }
 
-static TlsServer_Client*
-tlsServer_rpc_getClient()
-{
-    return getClient(tlsServer_rpc_get_sender_id());
-}
-
 static void
 init_network_client_api()
 {
@@ -213,6 +215,8 @@ tlsServer_rpc_connect(
     OS_Error_t err;
     TlsServer_Client* client;
 
+    GET_CLIENT(client, tlsServer_rpc_get_sender_id());
+
     /*
      * Check the paramter are OK; this should actually be done by the NW layer
      * but at this point it doesn't do much and if it cannot connect then it
@@ -228,11 +232,7 @@ tlsServer_rpc_connect(
         Debug_LOG_ERROR("Port number is invalid");
         return OS_ERROR_INVALID_PARAMETER;
     }
-    if ((client = tlsServer_rpc_getClient()) == NULL)
-    {
-        Debug_LOG_ERROR("Could not get corresponding client state");
-        return OS_ERROR_NOT_FOUND;
-    }
+
     if (client->connected)
     {
         Debug_LOG_ERROR("Socket of client (%i) is already connected", client->id);
@@ -261,11 +261,8 @@ tlsServer_rpc_disconnect(
     OS_Error_t err;
     TlsServer_Client* client;
 
-    if ((client = tlsServer_rpc_getClient()) == NULL)
-    {
-        Debug_LOG_ERROR("Could not get corresponding client state");
-        return OS_ERROR_NOT_FOUND;
-    }
+    GET_CLIENT(client, tlsServer_rpc_get_sender_id());
+
     if (!client->connected)
     {
         Debug_LOG_ERROR("Socket of client (%i) is not connected", client->id);
@@ -291,11 +288,7 @@ tlsServer_rpc_handshake(
 {
     TlsServer_Client* client;
 
-    if ((client = tlsServer_rpc_getClient()) == NULL)
-    {
-        Debug_LOG_ERROR("Could not get corresponding client state");
-        return OS_ERROR_NOT_FOUND;
-    }
+    GET_CLIENT(client, tlsServer_rpc_get_sender_id());
 
     return OS_Tls_handshake(client->hTls);
 }
@@ -306,11 +299,7 @@ tlsServer_rpc_write(
 {
     TlsServer_Client* client;
 
-    if ((client = tlsServer_rpc_getClient()) == NULL)
-    {
-        Debug_LOG_ERROR("Could not get corresponding client state");
-        return OS_ERROR_NOT_FOUND;
-    }
+    GET_CLIENT(client, tlsServer_rpc_get_sender_id());
 
     return OS_Tls_write(client->hTls, OS_Dataport_getBuf(port), dataSize);
 }
@@ -321,11 +310,7 @@ tlsServer_rpc_read(
 {
     TlsServer_Client* client;
 
-    if ((client = tlsServer_rpc_getClient()) == NULL)
-    {
-        Debug_LOG_ERROR("Could not get corresponding client state");
-        return OS_ERROR_NOT_FOUND;
-    }
+    GET_CLIENT(client, tlsServer_rpc_get_sender_id());
 
     return OS_Tls_read(client->hTls, OS_Dataport_getBuf(port), dataSize);
 }
@@ -336,11 +321,7 @@ tlsServer_rpc_reset(
 {
     TlsServer_Client* client;
 
-    if ((client = tlsServer_rpc_getClient()) == NULL)
-    {
-        Debug_LOG_ERROR("Could not get corresponding client state");
-        return OS_ERROR_NOT_FOUND;
-    }
+    GET_CLIENT(client, tlsServer_rpc_get_sender_id());
 
     return OS_Tls_reset(client->hTls);
 }
