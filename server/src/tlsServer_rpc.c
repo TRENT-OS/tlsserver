@@ -306,12 +306,12 @@ tlsServer_rpc_handshake(
 
 OS_Error_t
 tlsServer_rpc_write(
-    size_t dataSize)
+    size_t* dataSize)
 {
     TlsServer_Client* client;
 
     GET_CLIENT(client, tlsServer_rpc_get_sender_id());
-    CHK_SIZE(client, dataSize);
+    CHK_SIZE(client, *dataSize);
 
     return OS_Tls_write(client->hTls, OS_Dataport_getBuf(client->dataport),
                         dataSize);
