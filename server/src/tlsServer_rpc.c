@@ -110,7 +110,7 @@ send(
     n = len > MAX_NW_SIZE ? MAX_NW_SIZE : len;
     if ((err = OS_NetworkSocket_write(*hSocket, buf, n, &n)) != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("Error during hSocket write...error:%d", err);
+        Debug_LOG_ERROR("OS_NetworkSocket_write() failed with %d", err);
         return -1;
     }
 
@@ -130,7 +130,7 @@ recv(
     n = len > MAX_NW_SIZE ? MAX_NW_SIZE : len;
     if ((err = OS_NetworkSocket_read(*hSocket, buf, n, &n)) != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("Error during hSocket read...error:%d", err);
+        Debug_LOG_ERROR("OS_NetworkSocket_read() failed with %d", err);
         return -1;
     }
 
@@ -256,7 +256,7 @@ tlsServer_rpc_connect(
     if ((err = OS_NetworkSocket_create(NULL, &socketCfg,
                                        &client->hSocket)) != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("Creating NetworkSocket failed [err=%i]", err);
+        Debug_LOG_ERROR("OS_NetworkSocket_create() failed with %d", err);
         return err;
     }
 
@@ -282,7 +282,7 @@ tlsServer_rpc_disconnect(
 
     if ((err = OS_NetworkSocket_close(client->hSocket)) != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("Closing NetworkSocket failed [err=%i]", err);
+        Debug_LOG_ERROR("OS_NetworkSocket_close() failed with %d", err);
         return err;
     }
 
