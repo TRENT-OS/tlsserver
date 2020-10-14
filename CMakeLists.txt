@@ -1,5 +1,5 @@
 #
-# TLS Server CAmkES Component
+# TLS Server
 #
 # Copyright (C) 2020, Hensoldt Cyber GmbH
 #
