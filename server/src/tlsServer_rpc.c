@@ -250,7 +250,7 @@ tlsServer_rpc_connect(
         return OS_ERROR_INVALID_STATE;
     }
 
-    strncpy(socketCfg.name, host, sizeof(socketCfg.name)-1);
+    strncpy(socketCfg.name, host, sizeof(socketCfg.name) - 1);
     socketCfg.port = port;
 
     if ((err = OS_NetworkSocket_create(NULL, &socketCfg,
@@ -313,7 +313,8 @@ tlsServer_rpc_write(
     GET_CLIENT(client, tlsServer_rpc_get_sender_id());
     CHK_SIZE(client, dataSize);
 
-    return OS_Tls_write(client->hTls, OS_Dataport_getBuf(client->dataport), dataSize);
+    return OS_Tls_write(client->hTls, OS_Dataport_getBuf(client->dataport),
+                        dataSize);
 }
 
 OS_Error_t
@@ -325,7 +326,8 @@ tlsServer_rpc_read(
     GET_CLIENT(client, tlsServer_rpc_get_sender_id());
     CHK_SIZE(client, *dataSize);
 
-    return OS_Tls_read(client->hTls, OS_Dataport_getBuf(client->dataport), dataSize);
+    return OS_Tls_read(client->hTls, OS_Dataport_getBuf(client->dataport),
+                       dataSize);
 }
 
 OS_Error_t
