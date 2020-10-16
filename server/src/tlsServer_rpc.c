@@ -167,9 +167,8 @@ post_init()
     TlsServer_Client* client;
     OS_Error_t err;
 
-    // Check the configuration is somewhat sane
-    Debug_ASSERT(strlen(tlsServer_config.trustedCert) <= OS_Tls_SIZE_CA_CERT_MAX);
-    Debug_ASSERT(strlen(tlsServer_config.trustedCert)  > 0);
+    // Check the trusted cert is not empty
+    Debug_ASSERT(strlen(tlsServer_config.trustedCert) > 0);
 
     Debug_LOG_INFO("Starting up");
 
@@ -177,7 +176,7 @@ post_init()
     init_network_client_api();
     Debug_LOG_INFO("Networking initialized");
 
-    strcpy(tlsCfg.library.crypto.caCert, tlsServer_config.trustedCert);
+    tlsCfg.library.crypto.caCerts = tlsServer_config.trustedCert;
     for (size_t i = 0; i < TLS_CLIENTS_MAX; i++)
     {
         client = &serverState.clients[i];
