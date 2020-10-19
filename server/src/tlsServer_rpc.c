@@ -53,13 +53,10 @@ static OS_Tls_Config_t tlsCfg =
             .send = send,
         },
         .flags = OS_Tls_FLAG_DEBUG,
-        .crypto = {
-            .cipherSuites = {
-                OS_Tls_CIPHERSUITE_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-                OS_Tls_CIPHERSUITE_DHE_RSA_WITH_AES_128_GCM_SHA256
-            },
-            .cipherSuitesLen = 2
-        }
+        .crypto.cipherSuites =
+        OS_Tls_CIPHERSUITE_FLAGS(
+            OS_Tls_CIPHERSUITE_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+            OS_Tls_CIPHERSUITE_DHE_RSA_WITH_AES_128_GCM_SHA256)
     }
 };
 
