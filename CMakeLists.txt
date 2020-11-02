@@ -20,7 +20,7 @@ cmake_minimum_required(VERSION 3.17)
 #     optional, define libraries with specific implementations that the
 #     component shall use, e.g. crypto library or network stack.
 #
-function(DeclareCAmkESComponent_TlsServer name)
+function(TlsServer_DeclareCAmkESComponent name)
 
     cmake_parse_arguments(
         PARSE_ARGV
