@@ -140,9 +140,9 @@ getClient(
 {
     TlsServer_Client* client;
 
-    client = (id >= TLS_CLIENTS_MAX) ? NULL :
-             (serverState.clients[id].id != id) ? NULL :
-             &serverState.clients[id];
+    client = (id > TLS_CLIENTS_MAX) || (id <= 0) ? NULL :
+             (serverState.clients[id - 1].id != id) ? NULL :
+             &serverState.clients[id - 1];
 
     return client;
 }
@@ -182,7 +182,7 @@ post_init()
         client = &serverState.clients[i];
 
         // Assign ID
-        client->id = i;
+        client->id = i + 1;
         // Socket is initially disconnected
         client->connected = false;
 
