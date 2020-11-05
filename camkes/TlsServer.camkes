@@ -15,98 +15,113 @@ struct TlsServer_Config {
 }
 
 //------------------------------------------------------------------------------
-// Component
 
-#define DECLARE_COMPONENT_TlsServer(_name_)                                     \
-                                                                                \
-    component _name_ {                                                          \
-        dataport    Buf                     network_stack_dp;                   \
-        uses        if_OS_Socket            network_stack_rpc;                  \
-        consumes    ServiceReady            event_network_stack_init_done;      \
-                                                                                \
-        provides    if_TlsServer            tlsServer_rpc;                      \
-        dataport    Buf                     tlsServer_port;                     \
-                                                                                \
-        dataport    Buf                     entropy_port;                       \
-        uses        if_OS_Entropy           entropy_rpc;                        \
-                                                                                \
-        attribute   TlsServer_Config        tlsServer_config;                   \
+
+#define TlsServer_COMPONENT_DECLARE( \
+    _name_) \
+    \
+    component _name_ { \
+        dataport    Buf                     network_stack_dp; \
+        uses        if_OS_Socket            network_stack_rpc; \
+        consumes    ServiceReady            event_network_stack_init_done; \
+        \
+        provides    if_TlsServer            tlsServer_rpc; \
+        dataport    Buf                     tlsServer_port; \
+        \
+        dataport    Buf                     entropy_port; \
+        uses        if_OS_Entropy           entropy_rpc; \
+        \
+        attribute   TlsServer_Config        tlsServer_config; \
     }
 
 
 //------------------------------------------------------------------------------
-// Instance Connection
 
-#define DECLARE_AND_CONNECT_INSTANCE_TlsServer(                                 \
-    _name_,                                                                     \
-    _inst_,                                                                     \
-    _entropy_rpc_,                                                              \
-    _entropy_dp_,                                                               \
-    _nw_rpc_,                                                                   \
-    _nw_dp_,                                                                    \
-    _nw_ev_,                                                                    \
-    _tlsServer_rpc_,                                                            \
-    _tlsServer_dp_)                                                             \
-                                                                                \
-    component   _name_  _inst_;                                                 \
-                                                                                \
-    connection  seL4RPCCall                                                     \
-        _name_ ## _ ## _inst_ ## _entropy_rpc (                                 \
-            from    _inst_.entropy_rpc,                                         \
-            to      _entropy_rpc_                                               \
-        );                                                                      \
-    connection seL4SharedData                                                   \
-        _name_ ## _ ## _inst_ ## _entropy_dp (                                  \
-            from    _inst_.entropy_port,                                        \
-            to      _entropy_dp_                                                \
-        );                                                                      \
-                                                                                \
-    connection  seL4RPCCall                                                     \
-        _name_ ## _ ## _inst_ ## _nw_rpc (                                      \
-            from    _inst_.network_stack_rpc,                                   \
-            to      _nw_rpc_                                                    \
-        );                                                                      \
-    connection seL4SharedData                                                   \
-        _name_ ## _ ## _inst_ ## _nw_dp (                                       \
-            from    _inst_.network_stack_dp,                                    \
-            to      _nw_dp_                                                     \
-        );                                                                      \
-    connection seL4NotificationNative                                           \
-        _name_ ## _ ## _inst_ ## _nw_ev (                                       \
-            from    _nw_ev_,                                                    \
-            to      _inst_.event_network_stack_init_done                        \
-        );                                                                      \
-                                                                                \
-    connection seL4RPCCall                                                      \
-        _name_ ## _ ## _inst_ ## _tlsServer_rpc (                               \
-            from    _tlsServer_rpc_,                                            \
-            to      _inst_.tlsServer_rpc                                        \
-        );                                                                      \
-    connection seL4SharedData                                                   \
-        _name_ ## _ ## _inst_ ## _tlsServer_dp (                                \
-            from    _tlsServer_dp_,                                             \
-            to      _inst_.tlsServer_port                                       \
+
+#define TlsServer_INSTANCE_CONNECT( \
+    _inst_, \
+    _entropy_rpc_, \
+    _entropy_port_, \
+    _nw_rpc_, \
+    _nw_port_, \
+    _nw_evt_) \
+    \
+    connection  seL4RPCCall \
+        _inst_ ## _entropy_rpc( \
+            from    _inst_.entropy_rpc, \
+            to      _entropy_rpc_ \
+        ); \
+    connection seL4SharedData \
+        _inst_ ## _entropy_port( \
+            from    _inst_.entropy_port, \
+            to      _entropy_port_ \
+        ); \
+    connection  seL4RPCCall \
+        _inst_ ## _nw_rpc( \
+            from    _inst_.network_stack_rpc, \
+            to      _nw_rpc_ \
+        ); \
+    connection seL4SharedData \
+        _inst_ ## _nw_port( \
+            from    _inst_.network_stack_dp, \
+            to      _nw_port_ \
+        ); \
+    connection seL4NotificationNative \
+        _inst_ ## _nw_evt( \
+            from    _nw_evt_, \
+            to      _inst_.event_network_stack_init_done \
+        );
+
+
+#define TlsServer_INSTANCE_CONNECT_CLIENT( \
+    _inst_, \
+    _rpc_, \
+    _port_) \
+    \
+    connection seL4RPCCall \
+        _inst_ ## _tlsServer_rpc( \
+            from    _rpc_, \
+            to      _inst_.tlsServer_rpc \
+        ); \
+    connection seL4SharedData \
+        _inst_ ## _tlsServer_port( \
+            from    _port_, \
+            to      _inst_.tlsServer_port \
         );
 
 
 //------------------------------------------------------------------------------
-// Assignments of badges
 
-#define ASSIGN_CLIENT_BADGE_TlsServer(              \
-    _client_,                                       \
-    _tlsServer_rpc_,                                \
-    _val_)                                          \
-                                                    \
-    _client_._tlsServer_rpc_ ## _attributes = _val_;
+
+#define TlsServer_INSTANCE_CONFIGURE( \
+    _inst_, \
+    _cert_) \
+    \
+    _inst_.tlsServer_config = { \
+        "trustedCert" : _cert_ \
+    };
 
 
 //------------------------------------------------------------------------------
-// Configuration of instance
 
-#define CONFIGURE_INSTANCE_TlsServer(   \
-    _inst_,                             \
-    _cert_)                             \
-                                        \
-    _inst_.tlsServer_config = {         \
-        "trustedCert" : _cert_          \
-    };
+
+#define TlsServer_BADGE_ASSIGNER( \
+    _unused0_, \
+    _unused1_, \
+    _rpc_, \
+    _num_) \
+    \
+    _rpc_ ## _attributes = _num_;
+
+
+#define TlsServer_CLIENT_ASSIGN_BADGE( \
+    _rpc_, \
+    _val_) \
+    \
+    _rpc_ ## _attributes = _val_;
+
+
+#define TlsServer_CLIENT_ASSIGN_BADGES( \
+    ...) \
+    \
+    FOR_EACH_1P(TlsServer_BADGE_ASSIGNER,UNUSED,UNUSED,__VA_ARGS__)
