@@ -1,7 +1,15 @@
 /*
- *  Camkes definition of TlsServer component
+ * Copyright (C) 2020, Hensoldt Cyber GmbH
+ */
+
+/*
+ *  TlsServer CAmkES Component
  *
- *  Copyright (C) 2020, Hensoldt Cyber GmbH
+ *  to be used as:
+ *
+ *      #include "TlsServer/camkes/TlsServer.camkes"
+ *
+ *      TlsServer_COMPONENT_DECLARE(TlsServer)
  *
  */
 
@@ -17,6 +25,13 @@ struct TlsServer_Config {
 //------------------------------------------------------------------------------
 
 
+/*
+ * Declare the TlsServer with a given type name:
+ *
+ *      TlsServer_COMPONENT_DECLARE(
+ *          <name>
+ *      )
+ */
 #define TlsServer_COMPONENT_DECLARE( \
     _name_) \
     \
@@ -38,6 +53,15 @@ struct TlsServer_Config {
 //------------------------------------------------------------------------------
 
 
+/*
+ * Assign all the non-client interfaces:
+ *
+ *      TlsServer_INSTANCE_CONNECT(
+ *          <instance>,
+ *          <entropy>.<rpc>, <entrop>.<port>,
+ *          <network>.<rpc>, <network>.<port>, <network>.<evt>
+ *      )
+ */
 #define TlsServer_INSTANCE_CONNECT( \
     _inst_, \
     _entropy_rpc_, \
@@ -73,6 +97,18 @@ struct TlsServer_Config {
         );
 
 
+//------------------------------------------------------------------------------
+
+
+/*
+ * Assign single client via this macro:
+ *
+ *      TlsServer_INSTANCE_CONNECT_CLIENT(
+ *          <instance>,
+ *          <client>.<rpc>, <client>.<port>
+ *      )
+ *
+ */
 #define TlsServer_INSTANCE_CONNECT_CLIENT( \
     _inst_, \
     _rpc_, \
@@ -93,6 +129,15 @@ struct TlsServer_Config {
 //------------------------------------------------------------------------------
 
 
+/*
+ * Configure the trusted root certificate used by the TlsServer:
+ *
+ *      TlsServer_INSTANCE_CONFIGURE(
+ *          <instance>,
+ *          <cert>
+ *      )
+ *
+ */
 #define TlsServer_INSTANCE_CONFIGURE( \
     _inst_, \
     _cert_) \
@@ -105,6 +150,7 @@ struct TlsServer_Config {
 //------------------------------------------------------------------------------
 
 
+// Assign a single badge; this is used internally
 #define TlsServer_BADGE_ASSIGNER( \
     _unused0_, \
     _unused1_, \
@@ -114,6 +160,16 @@ struct TlsServer_Config {
     _rpc_ ## _attributes = _num_;
 
 
+/*
+ * Assign a badge to the connected client:
+ *
+ *      TlsServer_CLIENT_ASSIGN_BADGE(
+ *          <client_rpc>, <ID>
+ *      )
+ *
+ * NOTE: IDs need to start at 1!
+ *
+ */
 #define TlsServer_CLIENT_ASSIGN_BADGE( \
     _rpc_, \
     _val_) \
@@ -121,6 +177,17 @@ struct TlsServer_Config {
     _rpc_ ## _attributes = _val_;
 
 
+/*
+ * Assign badges to a list of clients; badge IDs will start at 1 and then be
+ * incremented.
+ *
+ *      TlsServer_CLIENT_ASSIGN_BADGES(
+ *          <client_rpc>,
+ *      )
+ *
+ * NOTE: TlsServer can take only ONE client at the moment!
+ *
+ */
 #define TlsServer_CLIENT_ASSIGN_BADGES( \
     ...) \
     \
