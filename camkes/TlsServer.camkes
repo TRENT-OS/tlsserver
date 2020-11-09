@@ -9,7 +9,7 @@
  *
  *      #include "TlsServer/camkes/TlsServer.camkes"
  *
- *      TlsServer_COMPONENT_DECLARE(TlsServer)
+ *      TlsServer_COMPONENT_DEFINE(TlsServer)
  *
  */
 
@@ -28,11 +28,11 @@ struct TlsServer_Config {
 /*
  * Declare the TlsServer with a given type name:
  *
- *      TlsServer_COMPONENT_DECLARE(
+ *      TlsServer_COMPONENT_DEFINE(
  *          <name>
  *      )
  */
-#define TlsServer_COMPONENT_DECLARE( \
+#define TlsServer_COMPONENT_DEFINE( \
     _name_) \
     \
     component _name_ { \
