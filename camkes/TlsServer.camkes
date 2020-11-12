@@ -13,6 +13,8 @@
  *
  */
 
+#pragma once
+
 import <if_OS_Socket.camkes>;
 import <if_OS_Entropy.camkes>;
 
