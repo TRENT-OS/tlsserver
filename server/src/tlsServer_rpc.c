@@ -64,7 +64,7 @@ seL4_Word tlsServer_rpc_get_sender_id(void);
 
 typedef struct
 {
-    unsigned int id;
+    unsigned int cid;
     OS_Tls_Handle_t hTls;
     OS_Crypto_Handle_t hCrypto;
     OS_Dataport_t dataport;
@@ -136,13 +136,13 @@ recv(
 
 static TlsServer_Client*
 getClient(
-    seL4_Word id)
+    seL4_Word cid)
 {
     TlsServer_Client* client;
 
-    client = (id > TLS_CLIENTS_MAX) || (id <= 0) ? NULL :
-             (serverState.clients[id - 1].id != id) ? NULL :
-             &serverState.clients[id - 1];
+    client = (cid > TLS_CLIENTS_MAX) || (cid <= 0) ? NULL :
+             (serverState.clients[cid - 1].cid != cid) ? NULL :
+             &serverState.clients[cid - 1];
 
     return client;
 }
@@ -182,7 +182,7 @@ post_init()
         client = &serverState.clients[i];
 
         // Assign ID
-        client->id = i + 1;
+        client->cid = i + 1;
         // Socket is initially disconnected
         client->connected = false;
 
@@ -242,7 +242,7 @@ tlsServer_rpc_connect(
 
     if (client->connected)
     {
-        Debug_LOG_ERROR("Socket of client (%i) is already connected", client->id);
+        Debug_LOG_ERROR("Socket of client (%i) is already connected", client->cid);
         return OS_ERROR_INVALID_STATE;
     }
 
@@ -272,7 +272,7 @@ tlsServer_rpc_disconnect(
 
     if (!client->connected)
     {
-        Debug_LOG_ERROR("Socket of client (%i) is not connected", client->id);
+        Debug_LOG_ERROR("Socket of client (%i) is not connected", client->cid);
         return OS_ERROR_INVALID_STATE;
     }
 
