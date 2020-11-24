@@ -242,7 +242,7 @@ tlsServer_rpc_connect(
 
     if (client->connected)
     {
-        Debug_LOG_ERROR("Socket of client (%i) is already connected", client->cid);
+        Debug_LOG_ERROR("Socket of client ID %u is already connected", client->cid);
         return OS_ERROR_INVALID_STATE;
     }
 
@@ -272,7 +272,7 @@ tlsServer_rpc_disconnect(
 
     if (!client->connected)
     {
-        Debug_LOG_ERROR("Socket of client (%i) is not connected", client->cid);
+        Debug_LOG_ERROR("Socket of client ID %u is not connected", client->cid);
         return OS_ERROR_INVALID_STATE;
     }
 
