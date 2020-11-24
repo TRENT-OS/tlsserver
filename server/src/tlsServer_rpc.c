@@ -8,6 +8,7 @@
 #include "OS_NetworkStackClient.h"
 
 #include "LibDebug/Debug.h"
+#include "LibMacros/Check.h"
 
 #include <camkes.h>
 #include <stdint.h>
@@ -23,15 +24,6 @@
             return OS_ERROR_NOT_FOUND; \
         } \
     } while(0)
-
-// Check a buffer size against a client's dataport size
-#define CHK_SIZE(cli, sz)                                                   \
-    if (sz > OS_Dataport_getSize(cli->dataport)) {                          \
-        Debug_LOG_ERROR("Requested size too big for client dataport "       \
-            "(got %zd bytes but can only handle %zd bytes)",                \
-            sz, OS_Dataport_getSize(cli->dataport));                        \
-        return OS_ERROR_INVALID_PARAMETER;                                  \
-    }
 
 // We need this to wait for NW to complete init process
 extern OS_Error_t OS_NetworkAPP_RT(OS_Network_Context_t ctx);
@@ -233,16 +225,8 @@ tlsServer_rpc_connect(
      * but at this point it doesn't do much and if it cannot connect then it
      * simply blocks indefinetely.
      */
-    if (0 == strlen(host))
-    {
-        Debug_LOG_ERROR("host cannot be empty");
-        return OS_ERROR_INVALID_PARAMETER;
-    }
-    if (port < 1 || port > 65535)
-    {
-        Debug_LOG_ERROR("Port number is invalid");
-        return OS_ERROR_INVALID_PARAMETER;
-    }
+    CHECK_STR_NOT_EMPTY(host);
+    CHECK_VALUE_IN_CLOSED_INTERVAL(port, 1, 65535);
 
     if (client->connected)
     {
@@ -311,7 +295,9 @@ tlsServer_rpc_write(
     TlsServer_Client* client;
 
     GET_CLIENT(client, tlsServer_rpc_get_sender_id());
-    CHK_SIZE(client, *dataSize);
+
+    CHECK_VALUE_IN_CLOSED_INTERVAL(*dataSize, 0,
+                                   OS_Dataport_getSize(client->dataport));
 
     return OS_Tls_write(client->hTls, OS_Dataport_getBuf(client->dataport),
                         dataSize);
@@ -324,7 +310,9 @@ tlsServer_rpc_read(
     TlsServer_Client* client;
 
     GET_CLIENT(client, tlsServer_rpc_get_sender_id());
-    CHK_SIZE(client, *dataSize);
+
+    CHECK_VALUE_IN_CLOSED_INTERVAL(*dataSize, 0,
+                                   OS_Dataport_getSize(client->dataport));
 
     return OS_Tls_read(client->hTls, OS_Dataport_getBuf(client->dataport),
                        dataSize);
