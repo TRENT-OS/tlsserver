@@ -13,13 +13,17 @@
 #include <stdint.h>
 #include <string.h>
 
-// Get a client when called via RPC
-#define GET_CLIENT(cli, cid)                                                \
-    if ((cli = getClient(cid)) == NULL)                                     \
-    {                                                                       \
-        Debug_LOG_ERROR("Could not get state for client with id %i", cid);  \
-        return OS_ERROR_NOT_FOUND;                                          \
-    }
+#define GET_CLIENT(cli, cid) \
+    do { \
+        if ((cli = getClient(cid)) == NULL) \
+        { \
+            Debug_LOG_ERROR("Could not get state for client with client ID %u, " \
+                            "the badge number is most likely not properly " \
+                            "configured", cid); \
+            return OS_ERROR_NOT_FOUND; \
+        } \
+    } while(0)
+
 // Check a buffer size against a client's dataport size
 #define CHK_SIZE(cli, sz)                                                   \
     if (sz > OS_Dataport_getSize(cli->dataport)) {                          \
