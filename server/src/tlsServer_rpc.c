@@ -58,6 +58,10 @@ static OS_Tls_Config_t tlsCfg =
 
 seL4_Word tlsServer_rpc_get_sender_id(void);
 
+// Translate between badge IDs and array index
+#define CID_TO_IDX(cid) ((cid)-101)
+#define IDX_TO_CID(idx) ((idx)+101)
+
 typedef struct
 {
     unsigned int cid;
@@ -134,11 +138,12 @@ static TlsServer_Client*
 getClient(
     seL4_Word cid)
 {
+    const int idx = CID_TO_IDX(cid);
     TlsServer_Client* client;
 
-    client = (cid > TLS_CLIENTS_MAX) || (cid <= 0) ? NULL :
-             (serverState.clients[cid - 1].cid != cid) ? NULL :
-             &serverState.clients[cid - 1];
+    client = ((idx < 0) || (idx >= TLS_CLIENTS_MAX))
+             ? NULL : (serverState.clients[idx].cid != cid)
+             ? NULL : &serverState.clients[idx];
 
     return client;
 }
@@ -178,7 +183,7 @@ post_init()
         client = &serverState.clients[i];
 
         // Assign ID
-        client->cid = i + 1;
+        client->cid = IDX_TO_CID(i);
         // Socket is initially disconnected
         client->connected = false;
 
