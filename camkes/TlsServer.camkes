@@ -15,6 +15,7 @@
 
 #pragma once
 
+import <std_connector.camkes>;
 import <if_OS_Socket.camkes>;
 import <if_OS_Entropy.camkes>;
 
