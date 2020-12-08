@@ -4,6 +4,7 @@
  *  Copyright (C) 2020, Hensoldt Cyber GmbH
  *
  */
+#pragma once
 
 #include "if_OS_Tls.camkes.h"
 
