@@ -40,7 +40,8 @@ function(TlsServer_DeclareCAmkESComponent name)
             -Werror
         LIBS
             os_core_api
-            os_libs
+            lib_debug
+            lib_macros
             os_tls
             ${TLS_SERVER_LIBS}
     )

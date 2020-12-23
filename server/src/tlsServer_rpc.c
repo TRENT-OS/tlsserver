@@ -7,8 +7,8 @@
 #include "OS_Network.h"
 #include "OS_NetworkStackClient.h"
 
-#include "LibDebug/Debug.h"
-#include "LibMacros/Check.h"
+#include "lib_debug/Debug.h"
+#include "lib_macros/Check.h"
 
 #include <camkes.h>
 #include <stdint.h>
