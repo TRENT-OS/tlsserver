@@ -18,7 +18,7 @@
 #include <stdint.h>
 
 /**
- * @brief Connect clien'ts socket to a remote host
+ * @brief Connect client's socket to a remote host
  *
  * The TlsServer has one socket per RPC client. Before a TLS connection can be
  * used, the respective socket has to be connected via this function.
