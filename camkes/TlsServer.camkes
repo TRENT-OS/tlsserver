@@ -39,7 +39,7 @@ struct TlsServer_Config {
     _name_) \
     \
     component _name_ { \
-        dataport    Buf                     network_stack_dp; \
+        dataport    Buf                     network_stack_port; \
         uses        if_OS_Socket            network_stack_rpc; \
         \
         provides    if_TlsServer            tlsServer_rpc; \
@@ -88,7 +88,7 @@ struct TlsServer_Config {
         ); \
     connection seL4SharedData \
         _inst_ ## _nw_port( \
-            from    _inst_.network_stack_dp, \
+            from    _inst_.network_stack_port, \
             to      _nw_port_ \
         ); \
 
