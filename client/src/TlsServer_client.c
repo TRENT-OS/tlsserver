@@ -1,6 +1,20 @@
-/* Copyright (C) 2020, Hensoldt Cyber GmbH */
+/*
+ * Copyright (C) 2020-2021, HENSOLDT Cyber GmbH
+ */
 
-#include "TlsServer.h"
+#include "TlsServer_client.h"
+
+
+OS_Error_t
+TlsServer_init(
+    const if_TlsServer_t* rpc)
+{
+    if (NULL == rpc)
+    {
+        return OS_ERROR_INVALID_PARAMETER;
+    }
+    return rpc->init();
+}
 
 OS_Error_t
 TlsServer_connect(

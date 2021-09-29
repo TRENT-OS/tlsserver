@@ -1,7 +1,7 @@
 #
 # TLS Server
 #
-# Copyright (C) 2020, Hensoldt Cyber GmbH
+# Copyright (C) 2020-2021, HENSOLDT Cyber GmbH
 #
 
 cmake_minimum_required(VERSION 3.17)
@@ -34,7 +34,7 @@ function(TlsServer_DeclareCAmkESComponent name)
     #---------------------------------------------------------------------------
     DeclareCAmkESComponent(${name}
         SOURCES
-            ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/server/src/tlsServer_rpc.c
+            ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/server/src/TlsServer.c
         C_FLAGS
             -Wall
             -Werror
@@ -56,7 +56,7 @@ function(TlsServer_DeclareCAmkESComponent name)
 
     target_sources(${PROJECT_NAME}
         INTERFACE
-            ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/client/src/TlsServer.c
+            ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/client/src/TlsServer_client.c
     )
 
     target_include_directories(${PROJECT_NAME}

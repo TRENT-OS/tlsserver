@@ -1,9 +1,9 @@
 /*
- *  Camkes interface of TlsServer
+ *  CAmkES interface of TlsServer
  *
- *  Copyright (C) 2020, Hensoldt Cyber GmbH
- *
+ *  Copyright (C) 2020-2021, HENSOLDT Cyber GmbH
  */
+
 #pragma once
 
 #include "if_OS_Tls.camkes.h"
@@ -12,6 +12,10 @@ procedure if_TlsServer {
     include "OS_Error.h";
 
     IF_OS_TLS_CAMKES
+
+    OS_Error_t
+    init(
+    );
 
     OS_Error_t
     connect(
@@ -23,3 +27,68 @@ procedure if_TlsServer {
     disconnect(
     );
 };
+
+//==============================================================================
+// Component interface fields macros
+//==============================================================================
+
+/**
+ * Declares the interface fields of a component implementing the user side of
+ * the Socket interface.
+ *
+ * @param[in] prefix Prefix to be used to generate a unique name for the
+ *                   connector.
+ */
+#define IF_TLSSERVER_USE(                                          \
+    prefix)                                                        \
+                                                                   \
+    uses     if_TlsServer         prefix##_rpc;
+
+/**
+ * Declares the interface fields of a component implementing the TlsServer
+ * interface. This currently allows for up to 8 clients to be connected.
+ *
+ * @param[in] prefix Prefix to be used to generate a unique name for the
+ *                   connector.
+ */
+#define IF_TLSSERVER_PROVIDE(                                  \
+    prefix)                                                    \
+                                                               \
+    provides if_TlsServer       prefix##_rpc;
+  
+
+
+
+//==============================================================================
+// Component interface field connection macros
+//==============================================================================
+
+/**
+ * Connect a user (e.g. a user application requiring tls connectivity) of an
+ * if_TlsServer interface to a provider.
+ *
+ * @param[in] inst_tls_server              Name of the interface provider
+ *                                         component instance.
+ * @param[in] inst_tls_server_field_prefix Prefix used to generate a unique
+ *                                         name for the connectors in
+ *                                         IF_TLSSERVER_PROVIDE().
+ * @param[in] inst_user                    Name of the interface user component
+ *                                         instance.
+ * @param[in] inst_user_field_prefix       Prefix used to generate a unique name
+ *                                         for the connectors in
+ *                                         IF_TLSSERVER_USE().
+ * @param[in] user_num                     Number of the interface provider port
+ *                                         and event to connect the user component
+ *                                         to.
+ */
+#define IF_TLSSERVER_CONNECT( \
+    inst_tls_server, \
+    inst_tls_server_field_prefix, \
+    inst_user, \
+    inst_user_field_prefix, \
+    user_num) \
+    \
+    connection seL4RPCDataport conn_##inst_tls_server##_##inst_user##_rpc( \
+        from inst_user.inst_user_field_prefix##_rpc, \
+        to   inst_tls_server.inst_tls_server_field_prefix##_rpc);
+         

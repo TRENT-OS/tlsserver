@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020, Hensoldt Cyber GmbH
+ * Copyright (C) 2020-2021, HENSOLDT Cyber GmbH
  */
 
 /*
@@ -16,10 +16,10 @@
 #pragma once
 
 import <std_connector.camkes>;
-import <if_OS_Socket.camkes>;
 import <if_OS_Entropy.camkes>;
 
-import <TlsServer/camkes/if_TlsServer.camkes>;
+#include <if_OS_Socket.camkes>
+#include "TlsServer/camkes/if_TlsServer.camkes"
 
 struct TlsServer_Config {
     string trustedCert;
@@ -39,11 +39,11 @@ struct TlsServer_Config {
     _name_) \
     \
     component _name_ { \
-        dataport    Buf                     networkStack_port; \
-        uses        if_OS_Socket            networkStack_rpc; \
+        control; \
         \
-        provides    if_TlsServer            tlsServer_rpc; \
-        dataport    Buf                     tlsServer_port; \
+        IF_OS_SOCKET_USE(networkStack)  \
+        \
+        IF_TLSSERVER_PROVIDE(tlsServer) \
         \
         dataport    Buf                     entropy_port; \
         uses        if_OS_Entropy           entropy_rpc; \
@@ -51,76 +51,31 @@ struct TlsServer_Config {
         attribute   TlsServer_Config        tlsServer_config; \
     }
 
-
 //------------------------------------------------------------------------------
 
 
-/*
- * Assign all the non-client interfaces:
+ /*
+ * Connects a variable number of client components to the if_TlsServer interface
+ * of a TlsServer instance.
  *
- *      TlsServer_INSTANCE_CONNECT(
- *          <instance>,
- *          <entropy>.<rpc>, <entrop>.<port>,
- *          <network>.<rpc>, <network>.<port>, <network>.<evt>
- *      )
+ * @param[in] inst Name of the TlsServer component instance.
+ * @param[in] ...  List of client user component instance names and the prefix
+ *                 used to generate a unique name for the connectors used in
+ *                 IF_TLSSERVER_USE() and that should be connected with the
+ *                 tlsServer instance specified earlier. To connect several
+ *                 user components at once follow the pattern of:
+ *                 <inst_user1>, <inst_user1_prefix_if_tlsServer>,
+ *                 <inst_user2>, <inst_user2_prefix_if_tlsServer>,
+ *                 ...
  */
-#define TlsServer_INSTANCE_CONNECT( \
-    _inst_, \
-    _entropy_rpc_, \
-    _entropy_port_, \
-    _nw_rpc_, \
-    _nw_port_) \
+#define TlsServer_INSTANCE_CONNECT_CLIENTS( \
+    inst, \
+    ...) \
     \
-    connection  seL4RPCCall \
-        _inst_ ## _entropy_rpc( \
-            from    _inst_.entropy_rpc, \
-            to      _entropy_rpc_ \
-        ); \
-    connection seL4SharedData \
-        _inst_ ## _entropy_port( \
-            from    _inst_.entropy_port, \
-            to      _entropy_port_ \
-        ); \
-    connection  seL4RPCCall \
-        _inst_ ## _nw_rpc( \
-            from    _inst_.networkStack_rpc, \
-            to      _nw_rpc_ \
-        ); \
-    connection seL4SharedData \
-        _inst_ ## _nw_port( \
-            from    _inst_.networkStack_port, \
-            to      _nw_port_ \
-        ); \
-
-
-//------------------------------------------------------------------------------
-
-
-/*
- * Assign single client via this macro:
- *
- *      TlsServer_INSTANCE_CONNECT_CLIENT(
- *          <instance>,
- *          <client>.<rpc>, <client>.<port>
- *      )
- *
- */
-#define TlsServer_INSTANCE_CONNECT_CLIENT( \
-    _inst_, \
-    _rpc_, \
-    _port_) \
-    \
-    connection seL4RPCCall \
-        _inst_ ## _tlsServer_rpc( \
-            from    _rpc_, \
-            to      _inst_.tlsServer_rpc \
-        ); \
-    connection seL4SharedData \
-        _inst_ ## _tlsServer_port( \
-            from    _port_, \
-            to      _inst_.tlsServer_port \
-        );
-
+    FOR_EACH_2P(IF_TLSSERVER_CONNECT, \
+                inst, \
+                tlsServer, \
+                __VA_ARGS__)
 
 //------------------------------------------------------------------------------
 
@@ -146,14 +101,19 @@ struct TlsServer_Config {
 //------------------------------------------------------------------------------
 
 
-// Assign a single badge; this is used internally
+/*
+ * Assign a single badge.
+ *
+ * This is used internally.
+ */
 #define TlsServer_BADGE_ASSIGNER( \
     _unused0_, \
     _unused1_, \
-    _rpc_, \
+    _inst_user_, \
+    _inst_user_field_prefix_, \
     _num_) \
     \
-    _rpc_ ## _attributes = (100 + _num_);
+    _inst_user_._inst_user_field_prefix_ ## _rpc_attributes = (100 + _num_);
 
 
 /*
@@ -165,26 +125,30 @@ struct TlsServer_Config {
  *
  * NOTE: IDs need to start at 101!
  *
+ * This is used internally.
  */
 #define TlsServer_CLIENT_ASSIGN_BADGE( \
-    _rpc_, \
+    _client_, \
+    _prefix_, \
     _val_) \
     \
-    _rpc_ ## _attributes = _val_;
+    _client_._prefix_ ## _attributes = _val_;
 
 
-/*
+ /*
  * Assign badges to a list of clients; badge IDs will start at 101 and then be
  * incremented.
  *
  *      TlsServer_CLIENT_ASSIGN_BADGES(
- *          <client_rpc>,
+ *          <inst_user1>, <inst_user1_prefix_if_tlsServer>,
+ *          <inst_user2>, <inst_user2_prefix_if_tlsServer>,
+ *           ...
  *      )
  *
- * NOTE: TlsServer can take only ONE client at the moment!
+ * NOTE: TlsServer can take up to 8 clients at the moment!
  *
  */
 #define TlsServer_CLIENT_ASSIGN_BADGES( \
     ...) \
     \
-    FOR_EACH_1P(TlsServer_BADGE_ASSIGNER,UNUSED,UNUSED,__VA_ARGS__)
+    FOR_EACH_2P(TlsServer_BADGE_ASSIGNER,UNUSED,UNUSED,__VA_ARGS__)
