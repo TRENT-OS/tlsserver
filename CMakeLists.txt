@@ -45,23 +45,21 @@ function(TlsServer_DeclareCAmkESComponent name)
             os_tls
             ${TLS_SERVER_LIBS}
     )
-
-    #---------------------------------------------------------------------------
-    # create the corresponding client project, which every client of this TLS
-    # server instance must include. We do not define this globally, because
-    # the clients may have server specific configurations in the future.
-    project(${name}_client C)
-
-    add_library(${PROJECT_NAME} INTERFACE)
-
-    target_sources(${PROJECT_NAME}
-        INTERFACE
-            ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/client/src/TlsServer_client.c
-    )
-
-    target_include_directories(${PROJECT_NAME}
-        INTERFACE
-            ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/client/include
-    )
-
 endfunction()
+
+#---------------------------------------------------------------------------
+# create the corresponding client project, which every client of this TlsServer
+# component instance must include.
+project(TlsServer_client C)
+
+add_library(${PROJECT_NAME} INTERFACE)
+
+target_sources(${PROJECT_NAME}
+    INTERFACE
+        ${CMAKE_CURRENT_LIST_DIR}/client/src/TlsServer_client.c
+)
+
+target_include_directories(${PROJECT_NAME}
+    INTERFACE
+        ${CMAKE_CURRENT_LIST_DIR}/client/include
+)
