@@ -18,7 +18,7 @@
 import <std_connector.camkes>;
 import <if_OS_Entropy.camkes>;
 
-#include <if_OS_Socket.camkes>
+#include "if_OS_Socket.camkes"
 #include "TlsServer/camkes/if_TlsServer.camkes"
 
 struct TlsServer_Config {

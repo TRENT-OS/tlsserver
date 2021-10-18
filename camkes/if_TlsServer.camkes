@@ -42,7 +42,7 @@ procedure if_TlsServer {
 #define IF_TLSSERVER_USE(                                          \
     prefix)                                                        \
                                                                    \
-    uses     if_TlsServer         prefix##_rpc;
+    uses if_TlsServer prefix##_rpc;
 
 /**
  * Declares the interface fields of a component implementing the TlsServer
@@ -54,7 +54,7 @@ procedure if_TlsServer {
 #define IF_TLSSERVER_PROVIDE(                                  \
     prefix)                                                    \
                                                                \
-    provides if_TlsServer       prefix##_rpc;
+    provides if_TlsServer prefix##_rpc;
   
 
 

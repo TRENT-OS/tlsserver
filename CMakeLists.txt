@@ -47,8 +47,8 @@ function(TlsServer_DeclareCAmkESComponent name)
     )
 endfunction()
 
-#---------------------------------------------------------------------------
-# create the corresponding client project, which every client of this TlsServer
+#-------------------------------------------------------------------------------
+# Create the corresponding client project, which every client of this TlsServer
 # component instance must include.
 project(TlsServer_client C)
 
