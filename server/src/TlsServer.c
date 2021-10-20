@@ -4,7 +4,7 @@
 
 #include "OS_Crypto.h"
 #include "OS_Tls.h"
-#include "OS_Network.h"
+#include "OS_Socket.h"
 
 #include "lib_debug/Debug.h"
 #include "lib_macros/Check.h"
@@ -73,7 +73,7 @@ typedef struct
     unsigned int clientId;
     OS_Tls_Handle_t hTls;
     OS_Crypto_Handle_t hCrypto;
-    OS_NetworkSocket_Handle_t hSocket;
+    OS_Socket_Handle_t hSocket;
     TlsServer_State_t state;
     OS_Error_t error;
 } TlsServer_Client_t;
@@ -142,7 +142,8 @@ getClientBySocketHandle(
     return NULL;
 }
 
-static OS_Error_t closeClientConnection(
+static OS_Error_t
+closeClientConnection(
     TlsServer_Client_t* client)
 {
     OS_Error_t err;
@@ -165,9 +166,9 @@ static OS_Error_t closeClientConnection(
         Debug_LOG_ERROR("OS_Tls_reset() failed with %d", err);
     }
 
-    if ((err = OS_NetworkSocket_close(client->hSocket)) != OS_SUCCESS)
+    if ((err = OS_Socket_close(client->hSocket)) != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("OS_NetworkSocket_close() failed with %d", err);
+        Debug_LOG_ERROR("OS_Socket_close() failed with %d", err);
     }
 
     client->state = DISCONNECTED;
@@ -208,23 +209,25 @@ initializeClients(
 
     for (int i = 0; i < numberConnectedClients; i++)
     {
+        seL4_Word clientId = tlsServer_rpc_enumerate_badge(i);
+
         Debug_LOG_DEBUG(
             "[TlsServer '%s'] clientId (%d): %d, Min: %d, Max: %d",
             get_instance_name(),
             i,
-            tlsServer_rpc_enumerate_badge(i),
+            clientId,
             MIN_BADGE_ID,
             MIN_BADGE_ID + numberConnectedClients - 1);
 
-        if ((tlsServer_rpc_enumerate_badge(i) < MIN_BADGE_ID) ||
-            (tlsServer_rpc_enumerate_badge(i) >= MIN_BADGE_ID +
+        if ((clientId < MIN_BADGE_ID) ||
+            (clientId >= MIN_BADGE_ID +
              numberConnectedClients))
         {
             Debug_LOG_ERROR(
                 "[TlsServer '%s'] Badge Id is out of bounds: %d, Min: %d,"
                 " Max: %d",
                 get_instance_name(),
-                tlsServer_rpc_enumerate_badge(i),
+                clientId,
                 MIN_BADGE_ID,
                 MIN_BADGE_ID + numberConnectedClients - 1);
             return OS_ERROR_OUT_OF_BOUNDS;
@@ -260,7 +263,7 @@ initializeClients(
 OS_Error_t
 tlsServer_rpc_init()
 {
-    return 0;
+    return OS_SUCCESS;
 }
 
 OS_Error_t
@@ -310,7 +313,7 @@ tlsServer_rpc_connect(
     do
     {
         seL4_Yield();
-        err = OS_NetworkSocket_create(
+        err = OS_Socket_create(
                   &networkStackCtx,
                   &client->hSocket,
                   OS_AF_INET,
@@ -320,19 +323,19 @@ tlsServer_rpc_connect(
 
     if (err != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("OS_NetworkSocket_create() failed, code %d", err);
+        Debug_LOG_ERROR("OS_Socket_create() failed, code %d", err);
         return err;
     }
 
-    OS_NetworkSocket_Addr_t dstAddr;
+    OS_Socket_Addr_t dstAddr;
     strncpy(dstAddr.addr, host, sizeof(dstAddr.addr) - 1);
     dstAddr.port = port;
 
-    err = OS_NetworkSocket_connect(client->hSocket, &dstAddr);
+    err = OS_Socket_connect(client->hSocket, &dstAddr);
     if (err != OS_SUCCESS)
     {
-        Debug_LOG_ERROR("OS_NetworkSocket_create() failed, code %d", err);
-        OS_NetworkSocket_close(client->hSocket);
+        Debug_LOG_ERROR("OS_Socket_create() failed, code %d", err);
+        OS_Socket_close(client->hSocket);
         return err;
     }
 
@@ -363,7 +366,6 @@ OS_Error_t
 tlsServer_rpc_handshake(
     void)
 {
-    OS_Error_t err;
     TlsServer_Client_t* client;
 
     GET_CLIENT(client, get_client_id());
@@ -377,7 +379,7 @@ tlsServer_rpc_handshake(
         return OS_ERROR_INVALID_STATE;
     }
 
-    err = OS_Tls_handshake(client->hTls);
+    OS_Error_t err = OS_Tls_handshake(client->hTls);
 
     switch (err)
     {
@@ -431,7 +433,6 @@ OS_Error_t
 tlsServer_rpc_read(
     size_t* dataSize)
 {
-    OS_Error_t err;
     TlsServer_Client_t* client;
 
     GET_CLIENT(client, get_client_id());
@@ -446,9 +447,8 @@ tlsServer_rpc_read(
         return OS_ERROR_INVALID_STATE;
     }
 
-    err = OS_Tls_read(client->hTls, get_client_id_buf(),
-                      dataSize);
-    return err;
+    return OS_Tls_read(client->hTls, get_client_id_buf(),
+                       dataSize);
 }
 
 OS_Error_t
@@ -482,10 +482,6 @@ post_init()
     {
         initializationComplete = true;
     }
-    else
-    {
-        initializationComplete = false;
-    }
 
     return;
 }
@@ -504,7 +500,6 @@ run(
     size_t evtBufferSize = sizeof(evtBuffer);
     int numberOfSocketsWithEvents;
 
-
     if (!initializationComplete)
     {
         Debug_LOG_ERROR("TlsServer initialization failed, stopping");
@@ -515,14 +510,14 @@ run(
     for (;;)
     {
         // Wait until we get an event for the listening socket.
-        err = OS_NetworkSocket_wait(&networkStackCtx);
+        err = OS_Socket_wait(&networkStackCtx);
         if (err != OS_SUCCESS)
         {
-            Debug_LOG_ERROR("OS_NetworkSocket_wait() failed, code %d", err);
+            Debug_LOG_ERROR("OS_Socket_wait() failed, code %d", err);
             return -1;
         }
 
-        err = OS_NetworkSocket_getPendingEvents(
+        err = OS_Socket_getPendingEvents(
                   &networkStackCtx,
                   evtBuffer,
                   evtBufferSize,
@@ -530,7 +525,7 @@ run(
 
         if (err != OS_SUCCESS)
         {
-            Debug_LOG_ERROR("OS_NetworkSocket_getPendingEvents() failed, err %d",
+            Debug_LOG_ERROR("OS_Socket_getPendingEvents() failed, err %d",
                             err);
             continue;
         }
@@ -542,7 +537,7 @@ run(
         int offset = 0;
         for (int i = 0; i < numberOfSocketsWithEvents; i++)
         {
-            OS_NetworkSocket_Evt_t event;
+            OS_Socket_Evt_t event;
             memcpy(&event, &evtBuffer[offset], sizeof(event));
             offset += sizeof(event);
 
@@ -566,19 +561,19 @@ run(
 
             if (client == NULL)
             {
-                Debug_LOG_ERROR("OS_NetworkSocket_getPendingEvents: unknown"
+                Debug_LOG_ERROR("OS_Socket_getPendingEvents: unknown"
                                 " handle received: %d",
                                 event.socketHandle);
                 continue;
             }
 
-            // socket has been closed by network stack
+            // Socket has been closed by network stack
             if (event.eventMask & OS_SOCK_EV_FIN)
             {
-                Debug_LOG_ERROR("OS_NetworkSocket_getPendingEvents:"
-                                " OS_SOCK_EV_FIN for clientId %d, handle: %d",
-                                client->clientId,
-                                event.socketHandle);
+                Debug_LOG_INFO("OS_Socket_getPendingEvents:"
+                               " OS_SOCK_EV_FIN for clientId %d, handle: %d",
+                               client->clientId,
+                               event.socketHandle);
                 closeClientConnection(client);
                 continue;
             }
@@ -593,29 +588,25 @@ run(
                                 event.socketHandle);
             }
 
-            // new client connection (TCP only)
+            // New client connection pending - only valid for TCP server
             if (event.eventMask & OS_SOCK_EV_CONN_ACPT)
             {
-                Debug_LOG_ERROR("OS_NetworkSocket_getPendingEvents: Unexpected"
+                Debug_LOG_ERROR("OS_Socket_getPendingEvents: Unexpected"
                                 " event - OS_SOCK_EV_CONN_ACPT handle: %d",
                                 event.socketHandle);
             }
 
-            // new data to read - only clients
-            if (event.eventMask & OS_SOCK_EV_READ)
+            // New data received or ready to send data
+            if ((event.eventMask & OS_SOCK_EV_READ) ||
+                (event.eventMask & OS_SOCK_EV_WRITE))
             {
-                // do nothing
-                // currently the client needs to poll for new data
+                // Nothing to do.
+                // Events are currently not forwarded to the TlsServer clients.
+                // Hence, the TlsServer clients have to poll for new data or
+                // try to write data.
             }
 
-            // socket is available for sending - ignore for now
-            if (event.eventMask & OS_SOCK_EV_WRITE)
-            {
-                // do nothing
-                // currently the client needs to try to write data
-            }
-
-            // remote socket requested to be closed
+            // Remote socket requested to be closed
             if (event.eventMask & OS_SOCK_EV_CLOSE)
             {
                 // do nothing
@@ -626,7 +617,7 @@ run(
             // Error received - print error
             if (event.eventMask & OS_SOCK_EV_ERROR)
             {
-                Debug_LOG_ERROR("OS_NetworkSocket_getPendingEvents:"
+                Debug_LOG_ERROR("OS_Socket_getPendingEvents:"
                                 " OS_SOCK_EV_ERROR handle: %d, code: %d",
                                 event.socketHandle,
                                 event.currentError);

@@ -34,7 +34,7 @@ procedure if_TlsServer {
 
 /**
  * Declares the interface fields of a component implementing the user side of
- * the Socket interface.
+ * a if_TlsServer interface.
  *
  * @param[in] prefix Prefix to be used to generate a unique name for the
  *                   connector.
@@ -56,9 +56,6 @@ procedure if_TlsServer {
                                                                \
     provides if_TlsServer prefix##_rpc;
   
-
-
-
 //==============================================================================
 // Component interface field connection macros
 //==============================================================================
