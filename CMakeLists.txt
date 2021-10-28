@@ -14,24 +14,11 @@ cmake_minimum_required(VERSION 3.17)
 # Parameters:
 #
 #   <name>
-#     required, component instance name
+#       component instance name
 #
-#   LIBS <lib_1> <lib_2> ...
-#     optional, define libraries with specific implementations that the
-#     component shall use, e.g. crypto library or network stack.
-#
-function(TlsServer_DeclareCAmkESComponent name)
-
-    cmake_parse_arguments(
-        PARSE_ARGV
-        1
-        TLS_SERVER
-        "" # Option arguments
-        "" # Single arguments
-        "LIBS" # Multiple arguments
-    )
-
-    #---------------------------------------------------------------------------
+function(TlsServer_DeclareCAmkESComponent
+    name
+)
     DeclareCAmkESComponent(${name}
         SOURCES
             ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/server/src/TlsServer.c
@@ -43,8 +30,10 @@ function(TlsServer_DeclareCAmkESComponent name)
             lib_debug
             lib_macros
             os_tls
-            ${TLS_SERVER_LIBS}
+            os_crypto
+            os_socket_client
     )
+
 endfunction()
 
 #-------------------------------------------------------------------------------
