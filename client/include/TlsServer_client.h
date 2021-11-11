@@ -18,6 +18,19 @@
 #include <stdint.h>
 
 /**
+ * @brief Initialize TlsServer
+ *
+ * No functionality implemented yet.
+ *
+ * @param rpc (required) pointer to CAmkES rpc struct
+ *
+ * @retval OS_SUCCESS always
+ */
+OS_Error_t
+TlsServer_init(
+    const if_TlsServer_t* rpc);
+
+/**
  * @brief Connect client's socket to a remote host
  *
  * The TlsServer has one socket per RPC client. Before a TLS connection can be
