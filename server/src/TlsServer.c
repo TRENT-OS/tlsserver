@@ -195,17 +195,32 @@ initializeClients(
         return OS_ERROR_OUT_OF_BOUNDS;
     }
 
-    // Check the trusted cert is not empty
-    Debug_ASSERT(strlen(tlsServer_config.trustedCert) > 0);
-    if (strlen(tlsServer_config.trustedCert) <= 0)
+    // Check CA cert(s) and return  if empty (required config paramter)
+    Debug_ASSERT(strlen(tlsServer_config.caCerts) > 0);
+
+    if (strlen(tlsServer_config.caCerts) > 0)
+    {
+        tlsCfg.library.crypto.caCerts = tlsServer_config.caCerts;
+    }
+    else
     {
         Debug_LOG_ERROR(
-            "[TlsServer '%s'] Configuration for trustedCert not found",
+            "[TlsServer '%s'] Configuration for caCerts not found",
             get_instance_name());
         return OS_ERROR_NOT_INITIALIZED;
     }
 
-    tlsCfg.library.crypto.caCerts = tlsServer_config.trustedCert;
+    // Check own cert and use if not empty (optional config parameter)
+    if (strlen(tlsServer_config.ownCert) > 0)
+    {
+        tlsCfg.library.crypto.ownCert = tlsServer_config.ownCert;
+    }
+
+    // Check private key and use if not empty (optional config paramter)
+    if (strlen(tlsServer_config.privateKey) > 0)
+    {
+        tlsCfg.library.crypto.privateKey = tlsServer_config.privateKey;
+    }
 
     for (int i = 0; i < numberConnectedClients; i++)
     {

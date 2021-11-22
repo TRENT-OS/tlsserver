@@ -22,7 +22,9 @@ import <if_OS_Entropy.camkes>;
 #include "TlsServer/camkes/if_TlsServer.camkes"
 
 struct TlsServer_Config {
-    string trustedCert;
+    string caCerts;
+    string ownCert;
+    string privateKey;
 }
 
 //------------------------------------------------------------------------------
@@ -85,16 +87,22 @@ struct TlsServer_Config {
  *
  *      TlsServer_INSTANCE_CONFIGURE(
  *          <instance>,
- *          <cert>
+ *          <caCerts>,
+ *          <ownCert>,
+ *          <privateKey>
  *      )
  *
  */
 #define TlsServer_INSTANCE_CONFIGURE( \
     _inst_, \
-    _cert_) \
+    _caCerts_, \
+    _ownCert_, \
+    _privateKey) \
     \
     _inst_.tlsServer_config = { \
-        "trustedCert" : _cert_ \
+        "caCerts" : _caCerts_, \
+        "ownCert" : _ownCert_, \
+        "privateKey" : _privateKey \
     };
 
 
