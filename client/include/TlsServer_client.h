@@ -1,6 +1,12 @@
 /*
- * Copyright (C) 2020-2021, HENSOLDT Cyber GmbH
+ * Copyright (C) 2020-2024, HENSOLDT Cyber GmbH
  *
+ * SPDX-License-Identifier: GPL-2.0-or-later
+ *
+ * For commercial licensing, contact: info.cyber@hensoldt.net
+ */
+
+/**
  * @defgroup TlsServer component
  * @{
  *
@@ -28,7 +34,7 @@
  */
 OS_Error_t
 TlsServer_init(
-    const if_TlsServer_t* rpc);
+    const if_TlsServer_t *rpc);
 
 /**
  * @brief Connect client's socket to a remote host
@@ -48,9 +54,9 @@ TlsServer_init(
  */
 OS_Error_t
 TlsServer_connect(
-    const if_TlsServer_t* rpc,
-    const char*           host,
-    const uint16_t        port);
+    const if_TlsServer_t *rpc,
+    const char *host,
+    const uint16_t port);
 
 /**
  * @brief Disconnect socket
@@ -68,6 +74,6 @@ TlsServer_connect(
  */
 OS_Error_t
 TlsServer_disconnect(
-    const if_TlsServer_t* rpc);
+    const if_TlsServer_t *rpc);
 
 /** @} */
